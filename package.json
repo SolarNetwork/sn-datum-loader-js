@@ -35,6 +35,9 @@
   "babel": {
     "presets": [
       "@ava/stage-4"
+    ],
+    "plugins": [
+      "rewire"
     ]
   },
   "scripts": {
@@ -70,6 +73,7 @@
     "ava": "^0.20.0",
     "babel-core": "^6.24.1",
     "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-rewire": "^1.1.0",
     "babel-preset-env": "^1.6.0",
     "babel-register": "^6.24.1",
     "eslint": "3",
