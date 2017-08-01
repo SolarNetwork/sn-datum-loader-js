@@ -56,7 +56,7 @@ function testFilter() {
     filter.sourceId = TEST_SOURCE_ID;
     filter.startDate = TEST_START_DATE;
     filter.endDate = TEST_END_DATE;
-    filter.aggregation = Aggregations.HOUR;
+    filter.aggregation = Aggregations.Hour;
     return filter;
 }
 
@@ -91,7 +91,7 @@ test.serial.cb('load:onePage', t => {
 
     const datumReq = reqs[0];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
