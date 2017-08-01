@@ -19,7 +19,7 @@ import {
  * @callback DatumLoader~dataCallback
  * @param {Datum[]} data the result data
  * @param {boolean} [done] in incremental mode, will be `true` when invoked on the *last* page of data
- * @param {Pagination} page in incremental mode, the page associated with the data
+ * @param {Pagination} [page] in incremental mode, the page associated with the data
  */
 
 /**
@@ -52,26 +52,42 @@ class DatumLoader {
 		/** @type {AuthorizationV2Builder} */
 		this.authBuilder = authBuilder;
 
-        /** @type {dataCallback} */
-        this.finishedCallback = undefined;
+        /**
+		 * @type {dataCallback}
+		 * @private
+		 */
+        this._finishedCallback = undefined;
 
-        /** @type {object} */
-		this.urlParameters = undefined;
+        /**
+		 * @type {object}
+		 * @private
+		 */
+		this._urlParameters = undefined;
 		
-        /** @type {json} */
+        /**
+		 * @type {json}
+		 * @private
+		 */
 		this.jsonClient = json;
 		
 		/**
 		 * When `true` then call the callback function for every page of data as it becomes available.
 		 * Otherwise the callback function will be invoked only after all data has been loaded.
 		 * @type {boolean}
+		 * @private
 		 */
-		this.incrementalMode = false;
+		this._incrementalMode = false;
 
-		/** @type {number} */
+		/**
+		 * @type {number}
+		 * @private
+		 */
 		this._state = 0;
 
-		/** @type {Datum[]} */
+		/**
+		 * @type {Datum[]}
+		 * @private
+		 */
 		this._results = undefined;
     }
 
@@ -100,9 +116,9 @@ class DatumLoader {
 	 * @returns  {dataCallback|DatumLoader} when used as a getter, the current callback function, otherwise this object
 	 */
 	callback(value) {
-		if ( !value ) { return this.finishedCallback; }
+		if ( !value ) { return this._finishedCallback; }
 		if ( typeof value === 'function' ) {
-			this.finishedCallback = value;
+			this._finishedCallback = value;
 		}
 		return this;
 	}
@@ -115,9 +131,9 @@ class DatumLoader {
 	 * @returns {object|DatumLoader} when used as a getter, the URL parameters, otherwise this object
 	 */
     parameters(value) {
-		if ( !value ) return this.urlParameters;
+		if ( !value ) return this._urlParameters;
 		if ( typeof value === 'object' ) {
-			this.urlParameters = value;
+			this._urlParameters = value;
 		}
 		return this;
 	}
@@ -137,8 +153,8 @@ class DatumLoader {
 	 * @returns {boolean|DatumLoader} when used a a getter, the incremental mode; otherwise this object
 	 */
 	incremental(value) {
-		if ( value === undefined ) return this.incrementalMode;
-		this.incrementalMode = !!value;
+		if ( value === undefined ) return this._incrementalMode;
+		this._incrementalMode = !!value;
 		return this;
 	}
 
@@ -157,7 +173,7 @@ class DatumLoader {
 	load(callback) {
 		// to support queue use, allow callback to be passed directly to this function
 		if ( typeof callback === 'function' ) {
-			this.finishedCallback = callback;
+			this._finishedCallback = callback;
 		}
 		this._state = 1;
 		this.loadData();
@@ -178,13 +194,13 @@ class DatumLoader {
 			this._state = 2; // done
 		}
 
-		if ( this.finishedCallback ) {
+		if ( this._finishedCallback ) {
 			let args = [error, this._results];
-			if ( this.incrementalMode ) {
+			if ( this._incrementalMode ) {
 				args.push(done);
 				args.push(page);
 			}
-			this.finishedCallback.apply(this, args);
+			this._finishedCallback.apply(this, args);
 		}
 	}
 
@@ -193,12 +209,13 @@ class DatumLoader {
 	 * 
 	 * @param {Pagination} [page] the page to load
 	 * @returns {void}
+	 * @private
 	 */
 	loadData(page) {
 		let pagination = (page instanceof Pagination ? page : new Pagination());
 		let url = this.urlHelper.listDatumUrl(this.filter, undefined, pagination);
-		if ( this.urlParameters ) {
-			let queryParams = urlQuery.urlQueryEncode(this.urlParameters);
+		if ( this._urlParameters ) {
+			let queryParams = urlQuery.urlQueryEncode(this._urlParameters);
 			if ( queryParams ) {
 				url += '&' + queryParams;
 			}
@@ -211,7 +228,7 @@ class DatumLoader {
 				return;
 			}
 			
-			const incMode = this.incrementalMode;
+			const incMode = this._incrementalMode;
 			const nextOffset = offsetExtractor(json);
 
 			if ( this._results === undefined || incMode ) {
@@ -250,7 +267,8 @@ class DatumLoader {
  * Extract the datum list from the returned data.
  * 
  * @param {object} json the JSON results to extract from
- * @returns {Datum[]} the extracted data 
+ * @returns {Datum[]} the extracted data
+ * @private
  */
 
 function datumExtractor(json) {
@@ -264,7 +282,8 @@ function datumExtractor(json) {
  * Extract the page size from the returned data.
  * 
  * @param {object} json the JSON results to extract from
- * @returns {number} the extracted page size 
+ * @returns {number} the extracted page size
+ * @private
  */
 function pageSizeExtractor(json) {
 	const data = json.data;
@@ -277,7 +296,8 @@ function pageSizeExtractor(json) {
  * Extract the "next" offset to use based on the returned data.
  * 
  * @param {object} json the JSON results to extract from
- * @returns {number} the extracted offset 
+ * @returns {number} the extracted offset
+ * @private
  */
 function offsetExtractor(json) {
 	const data = json.data;
