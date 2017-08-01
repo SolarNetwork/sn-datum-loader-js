@@ -13,6 +13,14 @@ import {
  * @property {string} sourceId the control ID
  */
 
+/**
+ * The data callback function.
+ * 
+ * @callback DatumLoader~dataCallback
+ * @param {Datum[]} data the result data
+ * @param {boolean} [done] in incremental mode, will be `true` when invoked on the *last* page of data
+ * @param {Pagination} page in incremental mode, the page associated with the data
+ */
 
 /**
  * Load data for a set of source IDs, date range, and aggregate level using the `listDatumUrl()` endpoint
@@ -44,14 +52,21 @@ class DatumLoader {
 		/** @type {AuthorizationV2Builder} */
 		this.authBuilder = authBuilder;
 
-        /** @type {function} */
+        /** @type {dataCallback} */
         this.finishedCallback = undefined;
 
         /** @type {object} */
 		this.urlParameters = undefined;
 		
         /** @type {json} */
-        this.jsonClient = json;
+		this.jsonClient = json;
+		
+		/**
+		 * When `true` then call the callback function for every page of data as it becomes available.
+		 * Otherwise the callback function will be invoked only after all data has been loaded.
+		 * @type {boolean}
+		 */
+		this.incrementalMode = false;
 
 		/** @type {number} */
 		this._state = 0;
@@ -77,10 +92,12 @@ class DatumLoader {
 
 	/**
 	 * Get or set the callback function, invoked after all data has been loaded. The callback
-	 * function will be passed two arguments: an error and the results.
+	 * function will be passed two arguments: an error and the results. In incremental mode,
+	 * the callback will also be passed a boolean that will be `true` on that last page of data,
+	 * and a `Pagination` that details which page the callback represents.
 	 *
-	 * @param {function} [value] the callback function to use
-	 * @returns  {function|DatumLoader} when used as a getter, the current callback function, otherwise this object
+	 * @param {dataCallback} [value] the callback function to use
+	 * @returns  {dataCallback|DatumLoader} when used as a getter, the current callback function, otherwise this object
 	 */
 	callback(value) {
 		if ( !value ) { return this.finishedCallback; }
@@ -102,6 +119,26 @@ class DatumLoader {
 		if ( typeof value === 'object' ) {
 			this.urlParameters = value;
 		}
+		return this;
+	}
+
+	/**
+	 * Get or set _incremental mode_ for loading the data.
+	 * 
+	 * When incremental mode is enabled (set to `true`) then the callback function will be invoked
+	 * for _each result page_ that is loaded. The function will be passed a second `boolean` argument
+	 * that will be set to `true` only on the last page of result data, and a third Pagination`
+	 * object argument that details the starting offset of the page.
+	 * 
+	 * When incremental mode is disabled (set to `false`, the default) then all result pages are
+	 * combined into a single array and the callback will be invoked just once.
+	 * 
+	 * @param {boolean} [value] the incremental mode to set 
+	 * @returns {boolean|DatumLoader} when used a a getter, the incremental mode; otherwise this object
+	 */
+	incremental(value) {
+		if ( value === undefined ) return this.incrementalMode;
+		this.incrementalMode = !!value;
 		return this;
 	}
 
@@ -131,15 +168,23 @@ class DatumLoader {
 	 * Invoke the configured callback function.
 	 * 
 	 * @param {Error} [error] an optional  error
+	 * @param {boolean} done `true` if there is no more data to load
+	 * @param {Pagination} [page] the incremental mode page
 	 * @returns {void}
 	 * @private
 	 */
-	requestCompletionHandler(error) {
-		this._state = 2; // done
+	handleResults(error, done, page) {
+		if ( done ) {
+			this._state = 2; // done
+		}
 
-		// check if we're all done loading, and if so call our callback function
 		if ( this.finishedCallback ) {
-			this.finishedCallback.call(this, error, this._results);
+			let args = [error, this._results];
+			if ( this.incrementalMode ) {
+				args.push(done);
+				args.push(page);
+			}
+			this.finishedCallback.apply(this, args);
 		}
 	}
 
@@ -162,26 +207,39 @@ class DatumLoader {
 			let dataArray = datumExtractor(json);
 			if ( dataArray === undefined ) {
 				log.debug('No data available for %s', url);
-				this.requestCompletionHandler();
+				this.handleResults();
 				return;
 			}
+			
+			const incMode = this.incrementalMode;
+			const nextOffset = offsetExtractor(json);
 
-			if ( this._results === undefined ) {
+			if ( this._results === undefined || incMode ) {
 				this._results = dataArray;
+				
+				// discover page size, if pagination does not already have one
+				if ( pagination.max < 1 ) {
+					const max = pageSizeExtractor(json);
+					if ( max > 0 ) {
+						pagination = new Pagination(max, pagination.offset);
+					}
+				}
+				if ( incMode ) {
+					this.handleResults(undefined, nextOffset < 1, pagination);
+				}
 			} else {
 				this._results = this._results.concat(dataArray);
 			}
 
 			// see if we need to load more results
-			let nextOffset = offsetExtractor(json);
 			if ( nextOffset > 0 ) {
 				this.loadData(pagination.withOffset(nextOffset));
-			} else {
-				this.requestCompletionHandler();
+			} else if ( !incMode ) {
+				this.handleResults(undefined, true);
 			}
 		}).on('error', (error) => {
 			log.error('Error requesting data for %s: %s', url, error);
-			this.requestCompletionHandler(error);
+			this.handleResults(error);
 		})
 		.get();
 	}
@@ -203,14 +261,28 @@ function datumExtractor(json) {
 }
 
 /**
+ * Extract the page size from the returned data.
+ * 
+ * @param {object} json the JSON results to extract from
+ * @returns {number} the extracted page size 
+ */
+function pageSizeExtractor(json) {
+	const data = json.data;
+	return (data.returnedResultCount + data.startingOffset < data.totalResults
+			? data.returnedResultCount
+			: 0);
+}
+
+/**
  * Extract the "next" offset to use based on the returned data.
  * 
  * @param {object} json the JSON results to extract from
  * @returns {number} the extracted offset 
  */
 function offsetExtractor(json) {
-	return (json.data.returnedResultCount + json.data.startingOffset < json.data.totalResults
-			? (json.data.returnedResultCount + json.data.startingOffset)
+	const data = json.data;
+	return (data.returnedResultCount + data.startingOffset < data.totalResults
+			? (data.returnedResultCount + data.startingOffset)
 			: 0);
 }
 

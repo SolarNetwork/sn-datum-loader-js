@@ -7,6 +7,7 @@ import {
     Logger as log,
     logLevels,
     NodeDatumUrlHelper,
+    Pagination,
 } from 'solarnetwork-api-core';
 import { 
     TestAuthorizationV2Builder as TestAuthBuilder,
@@ -79,6 +80,44 @@ test.serial.cb('load:onePage', t => {
 
     loader.load((error, results) => {
         t.is(error, undefined);
+        const expected = JSON.parse(expectedRequestResults[0]);
+        t.deepEqual(results, expected.data.results);
+        t.end();
+    });
+
+    /** @type {sinon.SinonFakeXMLHttpRequest[]} */
+    const reqs = t.context.requests;
+
+    t.is(reqs.length, 1);
+
+    const datumReq = reqs[0];
+    t.is(datumReq.method, 'GET');
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.deepEqual(datumReq.requestHeaders, {
+        'Accept':'application/json',
+    });
+    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[0]);
+});
+
+test.serial.cb('load:incrementalOnePage', t => {
+    const filter = testFilter();
+    const loader = new DatumLoader(t.context.urlHelper, filter)
+        .client(t.context.reqJson)
+        .incremental(true);
+    t.truthy(loader);
+
+    const expectedRequestResults = [
+        '{"success":true,"data":' 
+            +'{"totalResults": 1, "startingOffset": 0, "returnedResultCount": 1, "results": ['
+                +'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0}'
+            +']}}',
+    ];
+
+    loader.load((error, results, done, page) => {
+        t.is(error, undefined);
+        t.is(done, true);
+        t.is(page instanceof Pagination, true);
+        t.is(page.offset, 0);
         const expected = JSON.parse(expectedRequestResults[0]);
         t.deepEqual(results, expected.data.results);
         t.end();
