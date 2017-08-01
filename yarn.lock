@@ -809,7 +809,7 @@ babylon@^6.1.0, babylon@^6.17.2, babylon@^6.17.4:
   version "6.17.4"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.4.tgz#3e8b7402b88d22c3423e137a1577883b15ff869a"
 
-babylon@~7.0.0-beta.17:
+babylon@~7.0.0-beta.16:
   version "7.0.0-beta.18"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.18.tgz#5c23ee3fdb66358aabf3789779319c5b78a233c7"
 
@@ -2473,7 +2473,7 @@ jsdoc@jsdoc3/jsdoc#releases/3.5:
   version "3.5.4-dev"
   resolved "https://codeload.github.com/jsdoc3/jsdoc/tar.gz/67bd0d2091a94f5202372b2e585e2fa0bb5a0b87"
   dependencies:
-    babylon "~7.0.0-beta.17"
+    babylon "~7.0.0-beta.16"
     bluebird "~3.5.0"
     catharsis "~0.8.9"
     escape-string-regexp "~1.0.5"
@@ -3731,6 +3731,13 @@ slide@^1.1.5:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
 
+solarnetwork-test-utils@SolarNetwork/sn-test-utils-js#develop:
+  version "0.0.1-dev.0"
+  resolved "https://codeload.github.com/SolarNetwork/sn-test-utils-js/tar.gz/55c8a2f386fd3c30d30052ea7b3959de4d707eb7"
+  dependencies:
+    d3-request "^1.0.5"
+    solarnetwork-api-core SolarNetwork/sn-api-core-js#develop
+
 sntp@1.x.x:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/sntp/-/sntp-1.0.9.tgz#6541184cc90aeea6c6e7b35e2659082443c66198"
@@ -3739,7 +3746,7 @@ sntp@1.x.x:
 
 solarnetwork-api-core@SolarNetwork/sn-api-core-js#develop:
   version "0.5.3-dev.0"
-  resolved "https://codeload.github.com/SolarNetwork/sn-api-core-js/tar.gz/ce04411c7891121743459e61703a05978f116edb"
+  resolved "https://codeload.github.com/SolarNetwork/sn-api-core-js/tar.gz/709075250fbb205245395f7ef203ed23b7fb79d3"
   dependencies:
     crypto-js "^3.1.9-1"
     d3-time-format "^2.0.5"
