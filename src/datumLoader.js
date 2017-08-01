@@ -266,7 +266,7 @@ class DatumLoader {
 				}
 			}).on('error', (error) => {
 				log.error('Error requesting data for %s: %s', url, error);
-				this.handleResults(error);
+				this.handleResults(new Error(`Error requesting data for ${url}: ${error}`));
 			})
 			.get();
 	}
