@@ -1,6 +1,7 @@
 import { json } from 'd3-request';
 import {
 	DatumFilter,
+	HttpHeaders,
 	Logger as log,
 	NodeDatumUrlHelper,
 	Pagination,
@@ -220,45 +221,54 @@ class DatumLoader {
 				url += '&' + queryParams;
 			}
 		}
-		this.jsonClient(url).on('load', (json) => {
-			let dataArray = datumExtractor(json);
-			if ( dataArray === undefined ) {
-				log.debug('No data available for %s', url);
-				this.handleResults();
-				return;
-			}
-			
-			const incMode = this._incrementalMode;
-			const nextOffset = offsetExtractor(json);
-
-			if ( this._results === undefined || incMode ) {
-				this._results = dataArray;
+		const authBuilder = this.authBuilder;
+		this.jsonClient(url)
+			.on('beforesend', (request) => {
+				if ( !authBuilder ) {
+					return;
+				}
+				authBuilder.reset().snDate(true).url(url);
+				request.setRequestHeader(HttpHeaders.X_SN_DATE, authBuilder.requestDateHeaderValue);
+				request.setRequestHeader(HttpHeaders.AUTHORIZATION, authBuilder.buildWithSavedKey());
+			}).on('load', (json) => {
+				let dataArray = datumExtractor(json);
+				if ( dataArray === undefined ) {
+					log.debug('No data available for %s', url);
+					this.handleResults();
+					return;
+				}
 				
-				// discover page size, if pagination does not already have one
-				if ( pagination.max < 1 ) {
-					const max = pageSizeExtractor(json);
-					if ( max > 0 ) {
-						pagination = new Pagination(max, pagination.offset);
-					}
-				}
-				if ( incMode ) {
-					this.handleResults(undefined, nextOffset < 1, pagination);
-				}
-			} else {
-				this._results = this._results.concat(dataArray);
-			}
+				const incMode = this._incrementalMode;
+				const nextOffset = offsetExtractor(json);
 
-			// see if we need to load more results
-			if ( nextOffset > 0 ) {
-				this.loadData(pagination.withOffset(nextOffset));
-			} else if ( !incMode ) {
-				this.handleResults(undefined, true);
-			}
-		}).on('error', (error) => {
-			log.error('Error requesting data for %s: %s', url, error);
-			this.handleResults(error);
-		})
-		.get();
+				if ( this._results === undefined || incMode ) {
+					this._results = dataArray;
+					
+					// discover page size, if pagination does not already have one
+					if ( pagination.max < 1 ) {
+						const max = pageSizeExtractor(json);
+						if ( max > 0 ) {
+							pagination = new Pagination(max, pagination.offset);
+						}
+					}
+					if ( incMode ) {
+						this.handleResults(undefined, nextOffset < 1, pagination);
+					}
+				} else {
+					this._results = this._results.concat(dataArray);
+				}
+
+				// see if we need to load more results
+				if ( nextOffset > 0 ) {
+					this.loadData(pagination.withOffset(nextOffset));
+				} else if ( !incMode ) {
+					this.handleResults(undefined, true);
+				}
+			}).on('error', (error) => {
+				log.error('Error requesting data for %s: %s', url, error);
+				this.handleResults(error);
+			})
+			.get();
 	}
 
 }

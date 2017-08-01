@@ -44,11 +44,6 @@ test.beforeEach(t => {
     });
     urlHelper.publicQuery = true;
     t.context.urlHelper = urlHelper;
-
-    const auth = new TestAuthBuilder(TEST_TOKEN_ID, urlHelper.environment);
-    auth.fixedDate = TEST_DATE;
-    auth.saveSigningKey(TEST_TOKEN_SECRET);
-    t.context.auth = auth;
 });
 
 function testFilter() {
@@ -95,6 +90,51 @@ test.serial.cb('load:onePage', t => {
     t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
+    });
+    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[0]);
+});
+
+function authBuilder(environment) {
+    const auth = new TestAuthBuilder(TEST_TOKEN_ID, environment);
+    auth.fixedDate = TEST_DATE;
+    auth.saveSigningKey(TEST_TOKEN_SECRET);
+    return auth;
+}
+
+test.serial.cb('load:onePage:sec', t => {
+    const urlHelper = t.context.urlHelper;
+    urlHelper.publicQuery = false;
+    const auth = authBuilder(urlHelper.environment);
+    const filter = testFilter();
+    const loader = new DatumLoader(t.context.urlHelper, filter, auth).client(t.context.reqJson);
+    t.truthy(loader);
+
+    const expectedRequestResults = [
+        '{"success":true,"data":' 
+            +'{"totalResults": 1, "startingOffset": 0, "returnedResultCount": 1, "results": ['
+                +'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0}'
+            +']}}',
+    ];
+
+    loader.load((error, results) => {
+        t.is(error, undefined);
+        const expected = JSON.parse(expectedRequestResults[0]);
+        t.deepEqual(results, expected.data.results);
+        t.end();
+    });
+
+    /** @type {sinon.SinonFakeXMLHttpRequest[]} */
+    const reqs = t.context.requests;
+
+    t.is(reqs.length, 1);
+
+    const datumReq = reqs[0];
+    t.is(datumReq.method, 'GET');
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/sec/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.deepEqual(datumReq.requestHeaders, {
+        'Accept':'application/json',
+        'X-SN-Date':TEST_DATE_STR,
+        'Authorization':'SNWS2 Credential=test-token,SignedHeaders=host;x-sn-date,Signature=ba22611cee0525ae9af5e4fa467c3a56c0e3b0e3283b2638eb9ef24128ae366d',
     });
     datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[0]);
 });
