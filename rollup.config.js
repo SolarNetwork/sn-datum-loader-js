@@ -13,6 +13,7 @@ export default {
     return /(d3-|solarnetwork-api-)/.test(id);
   },
   globals: {
+    'd3-queue': 'd3',
     'd3-request': 'd3',
     'solarnetwork-api-core': 'sn',
   },
