@@ -18,6 +18,7 @@ import {
  * The data callback function.
  * 
  * @callback DatumLoader~dataCallback
+ * @param {Error} [error] an error if a failure occurred
  * @param {Datum[]} data the result data
  * @param {boolean} [done] in incremental mode, will be `true` when invoked on the *last* page of data
  * @param {Pagination} [page] in incremental mode, the page associated with the data
@@ -31,6 +32,18 @@ import {
  * asynchronous callback function with {@link DatumLoader#callback}, call {@link DatumLoader#load}
  * to startloading the data. The callback function will be called once all data has been loaded. The
  * callback function can also be passed as an argument to the {@link DatumLoader#load} method directly.
+ * 
+ * @implements {Loader}
+ * @example
+ * const filter = new DatumFilter();
+ * filter.nodeId = 123;
+ * // configure other filter settings here...
+ * 
+ * const urlHelper = new NodeDatumUrlHelper();
+ * 
+ * new DatumLoader(urlHelper, filter).load((error, results) => {
+ *   // results is an array of Datum objects
+ * });
  */
 class DatumLoader {
 
@@ -43,6 +56,16 @@ class DatumLoader {
 	 *                                               then only public data can be queried
 	 */
     constructor(urlHelper, filter, authBuilder) {
+        Object.defineProperties(this, {
+                /**
+                 * The class version.
+                 * 
+                 * @memberof DatumLoader
+                 * @readonly
+                 * @type {string}
+                 */
+                version: { value: '1.0.0' }
+		});
 
 		/** @type {NodeDatumUrlHelper} */
 		this.urlHelper = urlHelper || new NodeDatumUrlHelper();
@@ -54,7 +77,7 @@ class DatumLoader {
 		this.authBuilder = authBuilder;
 
         /**
-		 * @type {dataCallback}
+		 * @type {DatumLoader~dataCallback}
 		 * @private
 		 */
         this._finishedCallback = undefined;
@@ -113,8 +136,8 @@ class DatumLoader {
 	 * the callback will also be passed a boolean that will be `true` on that last page of data,
 	 * and a `Pagination` that details which page the callback represents.
 	 *
-	 * @param {dataCallback} [value] the callback function to use
-	 * @returns  {dataCallback|DatumLoader} when used as a getter, the current callback function, otherwise this object
+	 * @param {DatumLoader~dataCallback} [value] the callback function to use
+	 * @returns  {DatumLoader~dataCallback|DatumLoader} when used as a getter, the current callback function, otherwise this object
 	 */
 	callback(value) {
 		if ( !value ) { return this._finishedCallback; }
@@ -166,9 +189,8 @@ class DatumLoader {
 	 * method,a callback function can be passed as an argument to this function. That allows this
 	 * function to be passed to things like `queue.defer`, for example.
 	 *
-	 * @param {function} [callback] a callback function to use; either this argument must be provided
-	 *                              or the function must have already been configured via 
-	 *                              {@link DatumLoader#callback}
+	 * @param {DatumLoader~dataCallback} [callback] a callback function to use; either this argument must be provided
+	 *                              or the function must have already been configured via {@link DatumLoader#callback}
 	 * @returns {DatumLoader} this object
 	 */
 	load(callback) {
