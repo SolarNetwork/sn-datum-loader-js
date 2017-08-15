@@ -62,10 +62,27 @@ class DatumRangeFinder {
 	 *                                               then only public data can be queried
      */
     constructor(urlHelpers, authBuilder) {
-        /** @type {NodeDatumUrlHelper[]} */
+        Object.defineProperties(this, {
+            /**
+             * The class version.
+             * 
+             * @memberof DatumRangeFinder
+             * @readonly
+             * @type {string}
+             */
+            version: { value: '1.0.0' }
+        });
+
+        /**
+         * @type {NodeDatumUrlHelper[]}
+         * @private
+         */
         this._helpers = Array.isArray(urlHelpers) ? urlHelpers : urlHelpers ? [urlHelpers] : [new NodeDatumUrlHelper()];
 
-        /** @type {AuthorizationV2Builder} */
+        /**
+         * @type {AuthorizationV2Builder}
+         * @private
+         */
 		this.authBuilder = authBuilder;
         
         /**
