@@ -1,4 +1,3 @@
-import { json } from 'd3-request';
 import {
 	DatumFilter,
 	HttpHeaders,
@@ -7,6 +6,8 @@ import {
 	Pagination,
 	urlQuery,
 } from 'solarnetwork-api-core';
+
+import JsonClientSupport from './jsonClientSupport';
 
 /**
  * @typedef {Object} Datum
@@ -45,7 +46,7 @@ import {
  *   // results is an array of Datum objects
  * });
  */
-class DatumLoader {
+class DatumLoader extends JsonClientSupport {
 
 	/**
 	 * Constructor.
@@ -56,6 +57,7 @@ class DatumLoader {
 	 *                                               then only public data can be queried
 	 */
     constructor(urlHelper, filter, authBuilder) {
+		super(authBuilder);
         Object.defineProperties(this, {
                 /**
                  * The class version.
@@ -73,9 +75,6 @@ class DatumLoader {
 		/** @type {DatumFilter} */
 		this.filter = filter || new DatumFilter({nodeIds:this.urlHelper.nodeIds});
 
-		/** @type {AuthorizationV2Builder} */
-		this.authBuilder = authBuilder;
-
         /**
 		 * @type {DatumLoader~dataCallback}
 		 * @private
@@ -87,12 +86,6 @@ class DatumLoader {
 		 * @private
 		 */
 		this._urlParameters = undefined;
-		
-        /**
-		 * @type {json}
-		 * @private
-		 */
-		this.jsonClient = json;
 		
 		/**
 		 * When `true` then call the callback function for every page of data as it becomes available.
@@ -114,21 +107,6 @@ class DatumLoader {
 		 */
 		this._results = undefined;
     }
-
-	/**
-	 * Get or set a JSON client function to use. The function must be compatible with `d3.json`
-	 * and defaults to that.
-	 *
-	 * @param {function} [value] the JSON client function, compatible with `d3.json`
-	 * @returns {function|DatumLoader} when used as a getter, the JSON client function, otherwise this object
-	 */
-	client(value) {
-        if ( !value ) return this.jsonClient;
-		if ( typeof value === 'function' ) {
-			this.jsonClient = value;
-		}
-		return this;
-	}
 
 	/**
 	 * Get or set the callback function, invoked after all data has been loaded. The callback
@@ -244,7 +222,8 @@ class DatumLoader {
 			}
 		}
 		const authBuilder = this.authBuilder;
-		this.jsonClient(url)
+		const jsonClient = this.client();
+		jsonClient(url)
 			.on('beforesend', (request) => {
 				if ( !authBuilder ) {
 					return;

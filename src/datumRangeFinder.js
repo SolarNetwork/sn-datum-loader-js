@@ -1,10 +1,11 @@
-import { json } from 'd3-request';
 import { queue } from 'd3-queue';
 import {
 	HttpHeaders,
 	Logger as log,
 	NodeDatumUrlHelper,
 } from 'solarnetwork-api-core';
+
+import JsonClientSupport from './jsonClientSupport';
 
 /**
  * @typedef {Object} DatumRange
@@ -34,7 +35,7 @@ import {
  * urlHelper.publicQuery = true;
  * urlHelper.nodeId = 123;
  * urlHelper.sourceIds = ['a', 'b'];
- * const range = await new DatumRangeFinder(urlHelper).do();
+ * const range = await new DatumRangeFinder(urlHelper).fetch();
  * 
  * @example
  * // more complex case, for multiple SolarNode / source ID combinations
@@ -42,7 +43,7 @@ import {
  * urlHelper2.publicQuery = true;
  * urlHelper2.nodeId = 234;
  * urlHelper2.sourceId = 'c';
- * const range2 = await new DatumRangeFinder([urlHelper, urlHelper2]).do();
+ * const range2 = await new DatumRangeFinder([urlHelper, urlHelper2]).fetch();
  * 
  * @example
  * // with authentication; note the authentication must be valid for all SolarNodes!
@@ -50,9 +51,9 @@ import {
  * auth.saveSigningKey('secret');
  * urlHelper.publicQuery = false;
  * urlHelper2.publicQuery = false;
- * const range3 = await new DatumRangeFinder([urlHelper, urlHelper2], auth).do();
+ * const range3 = await new DatumRangeFinder([urlHelper, urlHelper2], auth).fetch();
  */
-class DatumRangeFinder {
+class DatumRangeFinder extends JsonClientSupport {
     
     /**
      * Constructor.
@@ -62,6 +63,7 @@ class DatumRangeFinder {
 	 *                                               then only public data can be queried
      */
     constructor(urlHelpers, authBuilder) {
+        super(authBuilder);
         Object.defineProperties(this, {
             /**
              * The class version.
@@ -78,50 +80,6 @@ class DatumRangeFinder {
          * @private
          */
         this._helpers = Array.isArray(urlHelpers) ? urlHelpers : urlHelpers ? [urlHelpers] : [new NodeDatumUrlHelper()];
-
-        /**
-         * @type {AuthorizationV2Builder}
-         * @private
-         */
-		this.authBuilder = authBuilder;
-        
-        /**
-		 * @type {json}
-		 * @private
-		 */
-		this.jsonClient = json;
-    }
-
-	/**
-	 * Get or set a JSON client function to use. The function must be compatible with `d3.json`
-	 * and defaults to that.
-	 *
-	 * @param {function} [value] the JSON client function, compatible with `d3.json`
-	 * @returns {function|DatumRangeFinder} when used as a getter, the JSON client function, otherwise this object
-	 */
-	client(value) {
-        if ( !value ) return this.jsonClient;
-		if ( typeof value === 'function' ) {
-			this.jsonClient = value;
-		}
-		return this;
-    }
-    
-    /**
-     * Asynchronously find the available datum range.
-     * 
-     * @returns {Promise<DatumRange>} the result promise
-     */
-    do() {
-        return new Promise((resolve, reject) => {
-            this.exec((error, results) => {
-                if ( error ) {
-                    reject(error);
-                } else {
-                    resolve(results);
-                }
-            });
-        });
     }
 
     /**
@@ -130,9 +88,9 @@ class DatumRangeFinder {
      * @param {DatumRangeFinder~dataCallback} callback the callback function to invoke
      * @returns {void}
      */
-    exec(callback) {
+    load(callback) {
         const q = queue();
-        const jsonClient = this.jsonClient;
+        const jsonClient = this.client();
         const auth = this.authBuilder;
         for ( const urlHelper of this._helpers ) {
             const url = urlHelper.reportableIntervalUrl();

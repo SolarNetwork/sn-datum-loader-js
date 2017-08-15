@@ -89,6 +89,25 @@ class MultiLoader {
 		
     }
 
+    /**
+     * Asynchronously load the data.
+     * 
+     * This method calls {@link MultiLoader#load} to perform the actual work.
+     * 
+     * @returns {Promise<Object[]>} the result promise
+     */
+    fetch() {
+        return new Promise((resolve, reject) => {
+            this.load((error, results) => {
+                if ( error ) {
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+    }
+
 	/**
 	 * Initiate loading the data. This will call {@link Loader#load} on each
 	 * supplied loader, in parallel. As an alternative to configuring the callback function via
