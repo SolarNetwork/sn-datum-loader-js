@@ -54,7 +54,8 @@ class DatumLoader extends JsonClientSupport {
      * @param {NodeDatumUrlHelperMixin} urlHelper a URL helper for accessing node datum via SolarQuery
 	 * @param {DatumFilter} filter the filter parameters to use
 	 * @param {AuthorizationV2Builder} [authBuilder] the auth builder to authenticate requests with; if not provided
-	 *                                               then only public data can be queried
+	 *                                               then only public data can be queried; when provided a pre-signed
+     *                                               key must be available
 	 */
     constructor(urlHelper, filter, authBuilder) {
 		super(authBuilder);
@@ -221,16 +222,15 @@ class DatumLoader extends JsonClientSupport {
 				url += '&' + queryParams;
 			}
 		}
-		const authBuilder = this.authBuilder;
+		const auth = this.authBuilder;
 		const jsonClient = this.client();
 		jsonClient(url)
 			.on('beforesend', (request) => {
-				if ( !authBuilder ) {
-					return;
+				if ( auth && auth.signingKeyValid ) {
+					auth.reset().snDate(true).url(url);
+					request.setRequestHeader(HttpHeaders.X_SN_DATE, auth.requestDateHeaderValue);
+					request.setRequestHeader(HttpHeaders.AUTHORIZATION, auth.buildWithSavedKey());
 				}
-				authBuilder.reset().snDate(true).url(url);
-				request.setRequestHeader(HttpHeaders.X_SN_DATE, authBuilder.requestDateHeaderValue);
-				request.setRequestHeader(HttpHeaders.AUTHORIZATION, authBuilder.buildWithSavedKey());
 			}).on('load', (json) => {
 				let dataArray = datumExtractor(json);
 				if ( dataArray === undefined ) {

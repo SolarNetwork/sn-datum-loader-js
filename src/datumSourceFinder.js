@@ -55,7 +55,8 @@ class DatumSourceFinder extends JsonClientSupport {
      * 
      * @param {NodeDatumUrlHelper|NodeDatumUrlHelper[]} urlHelpers the helper(s) to find the avaialble sources for
 	 * @param {AuthorizationV2Builder} [authBuilder] the auth builder to authenticate requests with; if not provided
-	 *                                               then only public data can be queried
+	 *                                               then only public data can be queried; when provided a pre-signed
+     *                                               key must be available
      */
     constructor(urlHelpers, authBuilder) {
         super(authBuilder);
@@ -107,14 +108,14 @@ class DatumSourceFinder extends JsonClientSupport {
 
         function addRequest(key, url) {
             requestKeys.push(key);
-            const req = jsonClient(url);
-            if ( auth ) {
-                req.on('beforesend', (request) => {
-                    auth.reset().snDate(true).url(url);
+            const req = jsonClient(url)
+                .on('beforesend', (request) => {
+                    if ( auth && auth.signingKeyValid ) {
+                        auth.reset().snDate(true).url(url);
                     request.setRequestHeader(HttpHeaders.X_SN_DATE, auth.requestDateHeaderValue);
                     request.setRequestHeader(HttpHeaders.AUTHORIZATION, auth.buildWithSavedKey());
+                    }
                 });
-            }
             q.defer(req.get, null);
         }
         for ( const urlHelper of this._helpers ) {
