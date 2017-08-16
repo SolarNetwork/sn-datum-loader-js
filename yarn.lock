@@ -3749,6 +3749,14 @@ solarnetwork-api-core@0.6:
     d3-time-format "^2.0.5"
     uri-js "^3.0.2"
 
+solarnetwork-api-core@0.7:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/solarnetwork-api-core/-/solarnetwork-api-core-0.7.0.tgz#3d7eb41ee264e7253f1cf8f6065ef33c8ca112c5"
+  dependencies:
+    crypto-js "^3.1.9-1"
+    d3-time-format "^2.0.5"
+    uri-js "^3.0.2"
+
 solarnetwork-test-utils@0.1:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/solarnetwork-test-utils/-/solarnetwork-test-utils-0.1.0.tgz#c92c037f6f68faf1412140e23e77a015a72a043a"

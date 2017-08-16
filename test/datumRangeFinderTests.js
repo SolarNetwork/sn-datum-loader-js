@@ -72,7 +72,7 @@ test.serial('do:oneHelper', async t => {
         "startDateMillis": 1248668709972
     };
 
-    const rangePromise = finder.do();
+    const rangePromise = finder.fetch();
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -123,7 +123,7 @@ test.serial('do:oneHelper:sec', async t => {
         "startDateMillis": 1248668709972
     };
 
-    const rangePromise = finder.do();
+    const rangePromise = finder.fetch();
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -187,7 +187,7 @@ test.serial('do:twoHelpers', async t => {
     }];
 
 
-    const rangePromise = finder.do();
+    const rangePromise = finder.fetch();
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;

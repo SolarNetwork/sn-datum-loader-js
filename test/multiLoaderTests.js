@@ -62,7 +62,7 @@ test('construct:public', t => {
     t.truthy(loader);
 });
 
-test.serial.cb('load:onePage', t => {
+test.serial('load:onePage', async t => {
     const f1 = testFilter();
     const f2 = testFilter();
     f2.nodeId = TEST_NODE_ID_2;
@@ -82,14 +82,7 @@ test.serial.cb('load:onePage', t => {
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.falsy(error, undefined);
-        t.deepEqual(results, [
-            JSON.parse(expectedRequestResults[0]).data.results,
-            JSON.parse(expectedRequestResults[1]).data.results,
-        ]);
-        t.end();
-    });
+    const promise = loader.fetch();
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -109,4 +102,10 @@ test.serial.cb('load:onePage', t => {
             t.fail('Unexpected request: ' +JSON.stringify(datumReq, null, '  '));
         }
     }
+
+    const results = await promise;
+    t.deepEqual(results, [
+        JSON.parse(expectedRequestResults[0]).data.results,
+        JSON.parse(expectedRequestResults[1]).data.results,
+    ]);
 });
