@@ -9,6 +9,7 @@ import JsonClientSupport from './jsonClientSupport';
 
 /**
  * @typedef {Object} DatumRange
+ * @property {string} timeZone the local time zone of the node
  * @property {number} startDateMillis the start of the time range, in milliseconds since the epoch
  * @property {number} endDateMillis the end of the time range, in milliseconds since the epoch
  * @property {Date} sDate the start of the time range
@@ -28,6 +29,19 @@ import JsonClientSupport from './jsonClientSupport';
  * 
  * This is useful when generating reports or charts for a set of SolarNode datum streams,
  * so the overall start/end dates can be determined before requesting the actual data.
+ * It returns an object starting and ending date related properties, for example:
+ * 
+ * ```
+ * {
+ *   "timeZone":        "Pacific/Auckland",
+ *   "sDate":           Date(1248668709972),
+ *   "startDate":       "2009-07-27 16:25",
+ *   "startDateMillis": 1248668709972,
+ *   "eDate":           Date(1379824746781),
+ *   "endDate":         "2013-09-22 16:39",
+ *   "endDateMillis":   1379824746781
+ * }
+ * ```
  * 
  * @example
  * // the simple case, for just one SolarNode
