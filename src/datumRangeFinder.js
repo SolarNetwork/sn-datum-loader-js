@@ -74,7 +74,8 @@ class DatumRangeFinder extends JsonClientSupport {
      * 
      * @param {NodeDatumUrlHelper|NodeDatumUrlHelper[]} urlHelpers the helper(s) to find the avaialble data range for
 	 * @param {AuthorizationV2Builder} [authBuilder] the auth builder to authenticate requests with; if not provided
-	 *                                               then only public data can be queried
+	 *                                               then only public data can be queried; when provided a pre-signed
+     *                                               key must be available
      */
     constructor(urlHelpers, authBuilder) {
         super(authBuilder);
@@ -108,14 +109,14 @@ class DatumRangeFinder extends JsonClientSupport {
         const auth = this.authBuilder;
         for ( const urlHelper of this._helpers ) {
             const url = urlHelper.reportableIntervalUrl();
-            const req = jsonClient(url);
-            if ( auth ) {
-                req.on('beforesend', (request) => {
-                    auth.reset().snDate(true).url(url);
-                    request.setRequestHeader(HttpHeaders.X_SN_DATE, auth.requestDateHeaderValue);
-                    request.setRequestHeader(HttpHeaders.AUTHORIZATION, auth.buildWithSavedKey());
+            const req = jsonClient(url)
+                .on('beforesend', (request) => {
+                    if ( auth && auth.signingKeyValid ) {
+                        auth.reset().snDate(true).url(url);
+                        request.setRequestHeader(HttpHeaders.X_SN_DATE, auth.requestDateHeaderValue);
+                        request.setRequestHeader(HttpHeaders.AUTHORIZATION, auth.buildWithSavedKey());
+                    }
                 });
-            }
             q.defer(req.get, null);
 		}
         q.awaitAll((error, results) => {
