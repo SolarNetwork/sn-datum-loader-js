@@ -124,11 +124,9 @@ class MultiLoader {
 			this._finishedCallback = callback;
 		}
 		const q = queue();
-		this._loaders.forEach((e) => {
-			// queue.defer will invoke the callback with a `null` `this` object, so can't pass `e.load` directly here
-			q.defer((cb) => {
-				e.load(cb);
-			});
+		this._loaders.forEach((loader) => {
+			// queue.defer will invoke the callback with a `null` `this` object, so `e.load.bind` here
+			q.defer(loader.load.bind(loader));
 		});
 		q.awaitAll((error, results) => {
 			if ( this._finishedCallback ) {
