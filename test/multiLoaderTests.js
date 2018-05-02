@@ -73,11 +73,11 @@ test.serial('load:onePage', async t => {
 
     const expectedRequestResults = [
         '{"success":true,"data":' 
-            +'{"totalResults": 1, "startingOffset": 0, "returnedResultCount": 1, "results": ['
+            +'{"totalResults": null, "startingOffset": 0, "returnedResultCount": 1, "results": ['
                 +'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0}'
             +']}}',
         '{"success":true,"data":' 
-            +'{"totalResults": 1, "startingOffset": 0, "returnedResultCount": 1, "results": ['
+            +'{"totalResults": null, "startingOffset": 0, "returnedResultCount": 1, "results": ['
                 +'{"created": "2017-07-04 12:00:00.000Z","nodeId":234,"sourceId":"test-source","val":1}'
             +']}}',
     ];
@@ -94,9 +94,9 @@ test.serial('load:onePage', async t => {
         t.deepEqual(datumReq.requestHeaders, {
             'Accept':'application/json',
         });
-        if ( datumReq.url === 'https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour' ) {
+        if ( datumReq.url === 'https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=1000' ) {
             datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[0]);
-        } else if ( datumReq.url === 'https://localhost/solarquery/api/v1/pub/datum/list?nodeId=234&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour' ) {
+        } else if ( datumReq.url === 'https://localhost/solarquery/api/v1/pub/datum/list?nodeId=234&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=1000' ) {
             datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[1]);
         } else {
             t.fail('Unexpected request: ' +JSON.stringify(datumReq, null, '  '));

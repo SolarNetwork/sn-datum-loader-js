@@ -87,7 +87,7 @@ test.serial.cb('load:onePage', t => {
 
     const datumReq = reqs[0];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=1000");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
@@ -115,7 +115,7 @@ test.serial('load:onePage:promise', async t => {
 
     const datumReq = reqs[0];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=1000");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
@@ -162,11 +162,11 @@ test.serial.cb('load:onePage:sec', t => {
 
     const datumReq = reqs[0];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/sec/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/sec/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=1000");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
         'X-SN-Date':TEST_DATE_STR,
-        'Authorization':'SNWS2 Credential=test-token,SignedHeaders=host;x-sn-date,Signature=ba22611cee0525ae9af5e4fa467c3a56c0e3b0e3283b2638eb9ef24128ae366d',
+        'Authorization':'SNWS2 Credential=test-token,SignedHeaders=host;x-sn-date,Signature=52b465e297f097b20351da727abb3e4a4695a2ac5f3745da27973ad623d5f5ac',
     });
     datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[0]);
 });
@@ -202,7 +202,7 @@ test.serial.cb('load:incremental:onePage', t => {
 
     const datumReq = reqs[0];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=1000");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
@@ -211,19 +211,24 @@ test.serial.cb('load:incremental:onePage', t => {
 
 test.serial.cb('load:multiPage', t => {
     const filter = testFilter();
-    const loader = new DatumLoader(t.context.urlHelper, filter).client(t.context.reqJson);
+    const loader = new DatumLoader(t.context.urlHelper, filter)
+        .client(t.context.reqJson)
+        .paginationSize(2);
     t.truthy(loader);
 
     const expectedRequestResults = [
         '{"success":true,"data":' 
-            +'{"totalResults": 4, "startingOffset": 0, "returnedResultCount": 2, "results": ['
+            +'{"totalResults": null, "startingOffset": 0, "returnedResultCount": 2, "results": ['
                 +'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},'
                 +'{"created": "2017-07-04 13:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}'
             +']}}',
         '{"success":true,"data":' 
-            +'{"totalResults": 4, "startingOffset": 2, "returnedResultCount": 2, "results": ['
+            +'{"totalResults": null, "startingOffset": 2, "returnedResultCount": 2, "results": ['
                 +'{"created": "2017-07-04 14:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},'
                 +'{"created": "2017-07-04 15:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}'
+            +']}}',
+        '{"success":true,"data":' 
+            +'{"totalResults": null, "startingOffset": 4, "returnedResultCount": 0, "results": ['
             +']}}',
     ];
 
@@ -242,7 +247,7 @@ test.serial.cb('load:multiPage', t => {
 
     let datumReq = reqs[0];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
@@ -252,30 +257,40 @@ test.serial.cb('load:multiPage', t => {
 
     datumReq = reqs[1];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&max=2&offset=2");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=2");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
     datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[1]);
+
+    t.is(reqs.length, 3);
+
+    datumReq = reqs[2];
+    t.is(datumReq.method, 'GET');
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=4");
+    t.deepEqual(datumReq.requestHeaders, {
+        'Accept':'application/json',
+    });
+    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[2]);
 });
 
 test.serial.cb('load:incremental:multiPage', t => {
     const filter = testFilter();
     const loader = new DatumLoader(t.context.urlHelper, filter)
         .client(t.context.reqJson)
+        .paginationSize(2)
         .incremental(true);
     t.truthy(loader);
 
     const expectedRequestResults = [
         '{"success":true,"data":' 
-            +'{"totalResults": 4, "startingOffset": 0, "returnedResultCount": 2, "results": ['
+            +'{"totalResults": null, "startingOffset": 0, "returnedResultCount": 2, "results": ['
                 +'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},'
                 +'{"created": "2017-07-04 13:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}'
             +']}}',
         '{"success":true,"data":' 
-            +'{"totalResults": 4, "startingOffset": 2, "returnedResultCount": 2, "results": ['
-                +'{"created": "2017-07-04 14:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},'
-                +'{"created": "2017-07-04 15:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}'
+            +'{"totalResults": null, "startingOffset": 2, "returnedResultCount": 1, "results": ['
+                +'{"created": "2017-07-04 14:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0}'
             +']}}',
     ];
 
@@ -298,7 +313,7 @@ test.serial.cb('load:incremental:multiPage', t => {
 
     let datumReq = reqs[0];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
@@ -308,9 +323,75 @@ test.serial.cb('load:incremental:multiPage', t => {
 
     datumReq = reqs[1];
     t.is(datumReq.method, 'GET');
-    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&max=2&offset=2");
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=2");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
     datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[1]);
+});
+
+test.serial.cb('load:multiPage:includeTotalResultsCount', t => {
+    const filter = testFilter();
+    const loader = new DatumLoader(t.context.urlHelper, filter)
+        .client(t.context.reqJson)
+        .paginationSize(2)
+        .includeTotalResultsCount(true);
+    t.truthy(loader);
+
+    const expectedRequestResults = [
+        '{"success":true,"data":' 
+            +'{"totalResults": 4, "startingOffset": 0, "returnedResultCount": 2, "results": ['
+                +'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},'
+                +'{"created": "2017-07-04 13:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}'
+            +']}}',
+        '{"success":true,"data":' 
+            +'{"totalResults": null, "startingOffset": 2, "returnedResultCount": 2, "results": ['
+                +'{"created": "2017-07-04 14:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},'
+                +'{"created": "2017-07-04 15:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}'
+            +']}}',
+        '{"success":true,"data":' 
+            +'{"totalResults": null, "startingOffset": 4, "returnedResultCount": 0, "results": ['
+            +']}}',
+    ];
+
+    loader.load((error, results) => {
+        t.is(error, undefined);
+        const expected = JSON.parse(expectedRequestResults[0]).data.results
+            .concat(JSON.parse(expectedRequestResults[1]).data.results);
+        t.deepEqual(results, expected);
+        t.end();
+    });
+
+    /** @type {sinon.SinonFakeXMLHttpRequest[]} */
+    const reqs = t.context.requests;
+
+    t.is(reqs.length, 1);
+
+    let datumReq = reqs[0];
+    t.is(datumReq.method, 'GET');
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=false&max=2");
+    t.deepEqual(datumReq.requestHeaders, {
+        'Accept':'application/json',
+    });
+    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[0]);
+
+    t.is(reqs.length, 2);
+
+    datumReq = reqs[1];
+    t.is(datumReq.method, 'GET');
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=2");
+    t.deepEqual(datumReq.requestHeaders, {
+        'Accept':'application/json',
+    });
+    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[1]);
+
+    t.is(reqs.length, 3);
+
+    datumReq = reqs[2];
+    t.is(datumReq.method, 'GET');
+    t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=4");
+    t.deepEqual(datumReq.requestHeaders, {
+        'Accept':'application/json',
+    });
+    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[2]);
 });

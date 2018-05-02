@@ -112,8 +112,8 @@ class DatumSourceFinder extends JsonClientSupport {
                 .on('beforesend', (request) => {
                     if ( auth && auth.signingKeyValid ) {
                         auth.reset().snDate(true).url(url);
-                    request.setRequestHeader(HttpHeaders.X_SN_DATE, auth.requestDateHeaderValue);
-                    request.setRequestHeader(HttpHeaders.AUTHORIZATION, auth.buildWithSavedKey());
+                        request.setRequestHeader(HttpHeaders.X_SN_DATE, auth.requestDateHeaderValue);
+                        request.setRequestHeader(HttpHeaders.AUTHORIZATION, auth.buildWithSavedKey());
                     }
                 });
             q.defer(req.get, null);
