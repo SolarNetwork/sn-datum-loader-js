@@ -74,7 +74,22 @@ class DatumLoader extends JsonClientSupport {
 		this.urlHelper = urlHelper || new NodeDatumUrlHelper();
 
 		/** @type {DatumFilter} */
-		this.filter = filter || new DatumFilter({nodeIds:this.urlHelper.nodeIds});
+		this.filter = filter || new DatumFilter({
+			nodeIds: this.urlHelper.nodeIds,
+			withoutTotalResultsCount: true,
+		});
+
+		/**
+		 * @type {number}
+		 * @private
+		 */
+		this._pageSize = 1000;
+
+		/**
+		 * @type {boolean}
+		 * @private
+		 */
+		this._includeTotalResultsCount = false;
 
         /**
 		 * @type {DatumLoader~dataCallback}
@@ -162,6 +177,34 @@ class DatumLoader extends JsonClientSupport {
 	}
 
 	/**
+	 * Get or set the result pagination size.
+	 * 
+	 * @param {number} [value] the pagination size to set; defaults to `1000`
+	 * @returns {number|DatumLoader} when used as a getter, the pagination size; otherwise this object
+	 */
+	paginationSize(value) {
+		if ( isNaN(Number(value)) ) return this._pageSize;
+		this._pageSize = value;
+		return this;
+	}
+
+	/**
+	 * Get or set the flag for requesting the total results count.
+	 * 
+	 * By default the datum loader will _not_ request the overal total result count when querying
+	 * for data, as this speeds up queries. By setting this to `true` the total result count will
+	 * be requested on the _first_ query page.
+	 * 
+	 * @param {boolean} [value] the flag to include total results count
+	 * @returns {boolean|DatumLoader} when used a a getter, the total results count inclusion mode; otherwise this object
+	 */
+	includeTotalResultsCount(value) {
+		if ( value === undefined ) return this._includeTotalResultsCount;
+		this._includeTotalResultsCount = !!value;
+		return this;
+	}
+
+	/**
 	 * Initiate loading the data.
 	 * 
 	 * As an alternative to configuring the callback function via the {@link DatumLoader#callback}
@@ -178,7 +221,7 @@ class DatumLoader extends JsonClientSupport {
 			this._finishedCallback = callback;
 		}
 		this._state = 1;
-		this.loadData();
+		this.loadData(new Pagination(this._pageSize, 0));
 		return this;
 	}
 
@@ -215,7 +258,10 @@ class DatumLoader extends JsonClientSupport {
 	 */
 	loadData(page) {
 		let pagination = (page instanceof Pagination ? page : new Pagination());
-		let url = this.urlHelper.listDatumUrl(this.filter, undefined, pagination);
+		const queryFilter = new DatumFilter(this.filter);
+		queryFilter.withoutTotalResultsCount = (this._includeTotalResultsCount && pagination.offset === 0 
+			? false : true);
+		let url = this.urlHelper.listDatumUrl(queryFilter, undefined, pagination);
 		if ( this._urlParameters ) {
 			let queryParams = urlQuery.urlQueryEncode(this._urlParameters);
 			if ( queryParams ) {
@@ -240,7 +286,7 @@ class DatumLoader extends JsonClientSupport {
 				}
 				
 				const incMode = this._incrementalMode;
-				const nextOffset = offsetExtractor(json);
+				const nextOffset = offsetExtractor(json, pagination);
 
 				if ( this._results === undefined || incMode ) {
 					this._results = dataArray;
@@ -281,7 +327,6 @@ class DatumLoader extends JsonClientSupport {
  * @returns {Datum[]} the extracted data
  * @private
  */
-
 function datumExtractor(json) {
 	if ( json.success !== true || json.data === undefined || Array.isArray(json.data.results) !== true ) {
 		return undefined;
@@ -306,12 +351,24 @@ function pageSizeExtractor(json) {
 /**
  * Extract the "next" offset to use based on the returned data.
  * 
+ * If `page` is supplied, then pagination will be based on `page.max` and will continue
+ * until less than that many results are returned. If `page` is not supplied, then
+ * pagination will be based on `data.returnedResultCount` and will continue until
+ * `data.totalResults` has been returned.
+ * 
  * @param {object} json the JSON results to extract from
- * @returns {number} the extracted offset
+ * @param {Pagination} [page] the incremental mode page
+ * @returns {number} the extracted offset, or `0` if no more pages to return
  * @private
  */
-function offsetExtractor(json) {
+function offsetExtractor(json, page) {
 	const data = json.data;
+	if ( page && page.max ) {
+		// don't bother with totalResults; just keep going unless returnedResultCount < page.max
+		return (data.returnedResultCount < page.max
+			? 0
+			: data.startingOffset + page.max)
+	}
 	return (data.returnedResultCount + data.startingOffset < data.totalResults
 			? (data.returnedResultCount + data.startingOffset)
 			: 0);
