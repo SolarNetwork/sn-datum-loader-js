@@ -805,13 +805,13 @@ babel-types@^6.18.0, babel-types@^6.19.0, babel-types@^6.24.1, babel-types@^6.25
     lodash "^4.2.0"
     to-fast-properties "^1.0.1"
 
+babylon@7.0.0-beta.19:
+  version "7.0.0-beta.19"
+  resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.19.tgz#e928c7e807e970e0536b078ab3e0c48f9e052503"
+
 babylon@^6.1.0, babylon@^6.17.2, babylon@^6.17.4:
   version "6.17.4"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.4.tgz#3e8b7402b88d22c3423e137a1577883b15ff869a"
-
-babylon@~7.0.0-beta.16:
-  version "7.0.0-beta.18"
-  resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.18.tgz#5c23ee3fdb66358aabf3789779319c5b78a233c7"
 
 balanced-match@^1.0.0:
   version "1.0.0"
@@ -2473,11 +2473,11 @@ jschardet@^1.4.2:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/jschardet/-/jschardet-1.5.0.tgz#a61f310306a5a71188e1b1acd08add3cfbb08b1e"
 
-jsdoc@jsdoc3/jsdoc#releases/3.5:
-  version "3.5.4-dev"
-  resolved "https://codeload.github.com/jsdoc3/jsdoc/tar.gz/67bd0d2091a94f5202372b2e585e2fa0bb5a0b87"
+jsdoc@jsdoc3/jsdoc#3.5.5:
+  version "3.5.5"
+  resolved "https://codeload.github.com/jsdoc3/jsdoc/tar.gz/4c7f9049a0e8c6d014e4d7dd1335de7314955493"
   dependencies:
-    babylon "~7.0.0-beta.16"
+    babylon "7.0.0-beta.19"
     bluebird "~3.5.0"
     catharsis "~0.8.9"
     escape-string-regexp "~1.0.5"
