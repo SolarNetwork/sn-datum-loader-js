@@ -72,6 +72,9 @@ class DatumLoader extends JsonClientSupport {
 
 		/** @type {NodeDatumUrlHelper} */
 		this.urlHelper = urlHelper || new NodeDatumUrlHelper();
+		if ( !authBuilder ) {
+			urlHelper.publicQuery = true;
+		}
 
 		/** @type {DatumFilter} */
 		this.filter = filter || new DatumFilter({
@@ -257,10 +260,12 @@ class DatumLoader extends JsonClientSupport {
 	 * @private
 	 */
 	loadData(page) {
+		const auth = this.authBuilder;
 		let pagination = (page instanceof Pagination ? page : new Pagination());
 		const queryFilter = new DatumFilter(this.filter);
 		queryFilter.withoutTotalResultsCount = (this._includeTotalResultsCount && pagination.offset === 0 
 			? false : true);
+
 		let url = this.urlHelper.listDatumUrl(queryFilter, undefined, pagination);
 		if ( this._urlParameters ) {
 			let queryParams = urlQuery.urlQueryEncode(this._urlParameters);
@@ -268,7 +273,6 @@ class DatumLoader extends JsonClientSupport {
 				url += '&' + queryParams;
 			}
 		}
-		const auth = this.authBuilder;
 		const jsonClient = this.client();
 		jsonClient(url)
 			.on('beforesend', (request) => {
