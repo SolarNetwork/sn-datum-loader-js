@@ -42,7 +42,6 @@ test.beforeEach(t => {
     const urlHelper = new NodeDatumUrlHelper({
         host: 'localhost'
     });
-    urlHelper.publicQuery = true;
     t.context.urlHelper = urlHelper;
 });
 
@@ -135,7 +134,6 @@ function authBuilder(environment) {
 
 test.serial.cb('load:onePage:sec', t => {
     const urlHelper = t.context.urlHelper;
-    urlHelper.publicQuery = false;
     const auth = authBuilder(urlHelper.environment);
     const filter = testFilter();
     const loader = new DatumLoader(t.context.urlHelper, filter, auth).client(t.context.reqJson);
