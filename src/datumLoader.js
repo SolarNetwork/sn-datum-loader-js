@@ -7,6 +7,7 @@ import {
 	urlQuery,
 } from 'solarnetwork-api-core';
 
+import { queue } from 'd3-queue';
 import JsonClientSupport from './jsonClientSupport';
 
 /**
@@ -45,6 +46,7 @@ import JsonClientSupport from './jsonClientSupport';
  * new DatumLoader(urlHelper, filter).load((error, results) => {
  *   // results is an array of Datum objects
  * });
+ * @version 1.1.0
  */
 class DatumLoader extends JsonClientSupport {
 
@@ -67,7 +69,7 @@ class DatumLoader extends JsonClientSupport {
                  * @readonly
                  * @type {string}
                  */
-                version: { value: '1.0.0' }
+                version: { value: '1.1.0' }
 		});
 
 		/** @type {NodeDatumUrlHelper} */
@@ -115,6 +117,21 @@ class DatumLoader extends JsonClientSupport {
 		this._incrementalMode = false;
 
 		/**
+		 * When > 0 then make one request that includes the total result count and first page of
+		 * results, followed by parallel requests for the remaining pages.
+		 * @type {number}
+		 * @private
+		 */
+		this._concurrency = 0;
+
+		/**
+		 * A queue to use for parallel mode, when `concurrency` configured > 0.
+		 * @type {queue}
+		 * @private
+		 */
+		this._queue = null;
+
+		/**
 		 * @type {number}
 		 * @private
 		 */
@@ -126,6 +143,28 @@ class DatumLoader extends JsonClientSupport {
 		 */
 		this._results = undefined;
     }
+
+	/**
+	 * Get or set the concurrency limit to use for parallel requests.
+	 * 
+	 * By default requests are not made in parallel (this property is configured as `0`). Change
+	 * to a positive number to enable parallel query mode.
+	 * 
+	 * When parallel mode is enabled the loader will make one request that includes 
+	 * the total result count and first page of results, followed by parallel requests for any remaining pages
+	 * based on that total result count and configured page size.
+	 * 
+	 * @param {number} [value] the concurrency level to use, or `Infinity` for no limit
+	 * @returns {number|DatumLoader} when used as a getter, the current concurrency value, otherwise this object
+	 * @since 1.1.0
+	 */
+	concurrency(value) {
+		if ( value === undefined ) { return this._concurrency; }
+		if ( !isNaN(value) && Number(value) > 0 ) {
+			this._concurrency = Number(value);
+		}
+		return this;
+	}
 
 	/**
 	 * Get or set the callback function, invoked after all data has been loaded. The callback
@@ -224,6 +263,9 @@ class DatumLoader extends JsonClientSupport {
 			this._finishedCallback = callback;
 		}
 		this._state = 1;
+		if ( this._concurrency > 0 ) {
+			this._queue = queue(this._concurrency === Infinity ? null : this._concurrency);
+		}
 		this.loadData(new Pagination(this._pageSize, 0));
 		return this;
 	}
@@ -261,9 +303,10 @@ class DatumLoader extends JsonClientSupport {
 	 */
 	loadData(page) {
 		const auth = this.authBuilder;
+		const q = this._queue;
 		let pagination = (page instanceof Pagination ? page : new Pagination());
 		const queryFilter = new DatumFilter(this.filter);
-		queryFilter.withoutTotalResultsCount = (this._includeTotalResultsCount && pagination.offset === 0 
+		queryFilter.withoutTotalResultsCount = ((this._includeTotalResultsCount || q) && pagination.offset === 0 
 			? false : true);
 
 		let url = this.urlHelper.listDatumUrl(queryFilter, undefined, pagination);
@@ -274,7 +317,7 @@ class DatumLoader extends JsonClientSupport {
 			}
 		}
 		const jsonClient = this.client();
-		jsonClient(url)
+		const req = jsonClient(url)
 			.on('beforesend', (request) => {
 				if ( auth && auth.signingKeyValid ) {
 					auth.reset().snDate(true).url(url);
@@ -291,6 +334,7 @@ class DatumLoader extends JsonClientSupport {
 				
 				const incMode = this._incrementalMode;
 				const nextOffset = offsetExtractor(json, pagination);
+				const totalResults = (json.data ? json.data.totalResults : null);
 
 				if ( this._results === undefined || incMode ) {
 					this._results = dataArray;
@@ -311,15 +355,31 @@ class DatumLoader extends JsonClientSupport {
 
 				// see if we need to load more results
 				if ( nextOffset > 0 ) {
-					this.loadData(pagination.withOffset(nextOffset));
+					if ( q ) {
+						if ( totalResults > 0 ) {
+							// parallel mode with first page results; queue all remaining pages
+							for ( let pOffset = nextOffset; pOffset < totalResults; pOffset += pagination.max ) {
+								this.loadData(pagination.withOffset(pOffset));
+							}
+							q.awaitAll((error) => {
+								this.handleResults(error !== null ? error : undefined, true);
+							});
+						}
+					} else {
+						this.loadData(pagination.withOffset(nextOffset));
+					}
 				} else if ( !incMode ) {
 					this.handleResults(undefined, true);
 				}
 			}).on('error', (error) => {
 				log.error('Error requesting data for %s: %s', url, error);
 				this.handleResults(new Error(`Error requesting data for ${url}: ${error}`));
-			})
-			.get();
+			});
+		if ( q && pagination.offset > 0 ) {
+			q.defer(req.get, null);
+		} else {
+			req.get();
+		}
 	}
 
 }
