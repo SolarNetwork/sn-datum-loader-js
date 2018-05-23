@@ -55,6 +55,8 @@ import { queue } from 'd3-queue';
  * ]).load((error, results) => {
  *   // results is a 2-element array of Datum arrays
  * });
+ * 
+ * @version 1.1.0
  */
 class MultiLoader {
     
@@ -72,7 +74,7 @@ class MultiLoader {
                  * @readonly
                  * @type {string}
                  */
-                version: { value: '1.0.0' }
+                version: { value: '1.1.0' }
 		});
 
 		/**
@@ -86,8 +88,31 @@ class MultiLoader {
 		 * @private
 		 */
 		this._finishedCallback = undefined;
-		
-    }
+
+		/**
+		 * @type {number}
+		 * @private
+		 */
+		this._concurrency = Infinity;
+	}
+	
+	/**
+	 * Get or set the concurrency limit to use for requets.
+	 * 
+	 * A default, infinite concurrency queue will be used by default.
+	 * 
+	 * @param {number} [value] the concurrency level to use, or `Infinity` for no limit
+	 * @returns {number|MultiLoader} when used as a getter, the current concurrency value, otherwise this object
+	 * @since 1.1.0
+	 */
+	concurrency(value) {
+		if ( value === undefined ) { return this._concurrency; }
+		var n = Number(value);
+		if ( !isNaN(value) && n > 0 ) {
+			this._concurrency = n;
+		}
+		return this;
+	}
 
     /**
      * Asynchronously load the data.
@@ -123,7 +148,7 @@ class MultiLoader {
 		if ( typeof callback === 'function' ) {
 			this._finishedCallback = callback;
 		}
-		const q = queue();
+		const q = queue(this._concurrency);
 		this._loaders.forEach((loader) => {
 			// queue.defer will invoke the callback with a `null` `this` object, so `e.load.bind` here
 			q.defer(loader.load.bind(loader));
