@@ -42,7 +42,7 @@ import JsonClientSupport from './jsonClientSupport';
  *   "endDateMillis":   1379824746781
  * }
  * ```
- * 
+ * @extends {JsonClientSupport}
  * @example
  * // the simple case, for just one SolarNode
  * const urlHelper = new NodeDatumUrlHelper();

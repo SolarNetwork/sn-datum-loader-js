@@ -36,6 +36,7 @@ import JsonClientSupport from './jsonClientSupport';
  * callback function can also be passed as an argument to the {@link DatumLoader#load} method directly.
  * 
  * @implements {Loader}
+ * @extends {JsonClientSupport}
  * @example
  * const filter = new DatumFilter();
  * filter.nodeId = 123;
