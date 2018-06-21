@@ -26,7 +26,7 @@ import JsonClientSupport from './jsonClientSupport';
  * ```
  * { 123: ["a", "b", "c"] }
  * ```
- * 
+ * @extends {JsonClientSupport}
  * @example
  * // the simple case, all available sources for just one SolarNode
  * const urlHelper = new NodeDatumUrlHelper();

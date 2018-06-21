@@ -36,6 +36,7 @@ import JsonClientSupport from './jsonClientSupport';
  * callback function can also be passed as an argument to the {@link DatumLoader#load} method directly.
  * 
  * @implements {Loader}
+ * @extends {JsonClientSupport}
  * @example
  * const filter = new DatumFilter();
  * filter.nodeId = 123;
@@ -354,7 +355,7 @@ class DatumLoader extends JsonClientSupport {
 				}
 
 				// see if we need to load more results
-				if ( nextOffset > 0 ) {
+				if ( nextOffset > 0 || q ) {
 					if ( q ) {
 						if ( totalResults > 0 ) {
 							// parallel mode with first page results; queue all remaining pages
