@@ -83,12 +83,9 @@ test.serial.cb('load:onePage', t => {
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.is(error, undefined);
-        const expected = JSON.parse(expectedRequestResults[0]);
-        t.deepEqual(results, expected.data.results);
-        t.end();
-    });
+    const expected = JSON.parse(expectedRequestResults[0]).data.results;
+
+    loader.load(successSingleCallbackTestCompletion(t, expected));
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -157,12 +154,9 @@ test.serial.cb('load:onePage:sec', t => {
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.is(error, undefined);
-        const expected = JSON.parse(expectedRequestResults[0]);
-        t.deepEqual(results, expected.data.results);
-        t.end();
-    });
+    const expected = JSON.parse(expectedRequestResults[0]).data.results;
+
+    loader.load(successSingleCallbackTestCompletion(t, expected));
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -241,13 +235,10 @@ test.serial.cb('load:multiPage', t => {
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.is(error, undefined);
-        const expected = JSON.parse(expectedRequestResults[0]).data.results
-            .concat(JSON.parse(expectedRequestResults[1]).data.results);
-        t.deepEqual(results, expected);
-        t.end();
-    });
+    const expected = JSON.parse(expectedRequestResults[0]).data.results
+        .concat(JSON.parse(expectedRequestResults[1]).data.results);
+
+    loader.load(successSingleCallbackTestCompletion(t, expected));
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -363,13 +354,10 @@ test.serial.cb('load:multiPage:includeTotalResultsCount', t => {
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.is(error, undefined);
-        const expected = JSON.parse(expectedRequestResults[0]).data.results
-            .concat(JSON.parse(expectedRequestResults[1]).data.results);
-        t.deepEqual(results, expected);
-        t.end();
-    });
+    const expected = JSON.parse(expectedRequestResults[0]).data.results
+        .concat(JSON.parse(expectedRequestResults[1]).data.results);
+    
+    loader.load(successSingleCallbackTestCompletion(t, expected));
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -432,14 +420,11 @@ test.serial.cb('load:multiPage:parallel', t => {
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.is(error, undefined);
-        const expected = JSON.parse(expectedRequestResults[0]).data.results
-            .concat(JSON.parse(expectedRequestResults[1]).data.results)
-            .concat(JSON.parse(expectedRequestResults[2]).data.results);
-        t.deepEqual(results, expected);
-        t.end();
-    });
+    const expected = JSON.parse(expectedRequestResults[0]).data.results
+        .concat(JSON.parse(expectedRequestResults[1]).data.results)
+        .concat(JSON.parse(expectedRequestResults[2]).data.results);
+
+    loader.load(successSingleCallbackTestCompletion(t, expected));
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -500,14 +485,11 @@ test.serial.cb('load:multiPage:parallel:withoutExplicitTotalResultsCount', t => 
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.is(error, undefined);
-        const expected = JSON.parse(expectedRequestResults[0]).data.results
-            .concat(JSON.parse(expectedRequestResults[1]).data.results)
-            .concat(JSON.parse(expectedRequestResults[2]).data.results);
-        t.deepEqual(results, expected);
-        t.end();
-    });
+    const expected = JSON.parse(expectedRequestResults[0]).data.results
+        .concat(JSON.parse(expectedRequestResults[1]).data.results)
+        .concat(JSON.parse(expectedRequestResults[2]).data.results);
+
+    loader.load(successSingleCallbackTestCompletion(t, expected));
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
@@ -566,14 +548,11 @@ test.serial.cb('load:multiPage:parallel:outOfOrderResults', t => {
             +']}}',
     ];
 
-    loader.load((error, results) => {
-        t.is(error, undefined);
-        const expected = JSON.parse(expectedRequestResults[0]).data.results
-            .concat(JSON.parse(expectedRequestResults[1]).data.results)
-            .concat(JSON.parse(expectedRequestResults[2]).data.results);
-        t.deepEqual(results, expected);
-        t.end();
-    });
+    const expected = JSON.parse(expectedRequestResults[0]).data.results
+        .concat(JSON.parse(expectedRequestResults[1]).data.results)
+        .concat(JSON.parse(expectedRequestResults[2]).data.results);
+    
+    loader.load(successSingleCallbackTestCompletion(t, expected));
 
     /** @type {sinon.SinonFakeXMLHttpRequest[]} */
     const reqs = t.context.requests;
