@@ -560,7 +560,7 @@ test.serial.cb('load:multiPage:parallel:outOfOrderResults', t => {
         const expected = JSON.parse(expectedRequestResults[0]).data.results
             .concat(JSON.parse(expectedRequestResults[1]).data.results)
             .concat(JSON.parse(expectedRequestResults[2]).data.results);
-        //t.deepEqual(results, expected);
+        t.deepEqual(results, expected);
         t.end();
     });
 
@@ -579,13 +579,14 @@ test.serial.cb('load:multiPage:parallel:outOfOrderResults', t => {
 
     t.is(reqs.length, 3); // note jump to three for parallel
 
-    datumReq = reqs[2];
+     // note out of order requests, the last request is being returned first
+     datumReq = reqs[2];
     t.is(datumReq.method, 'GET');
     t.is(datumReq.url, "https://localhost/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=4");
     t.deepEqual(datumReq.requestHeaders, {
         'Accept':'application/json',
     });
-    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[2]); // note out of order requests, the last request is being returned first
+    datumReq.respond(200, { 'Content-Type': 'application/json' }, expectedRequestResults[2]);
 
     datumReq = reqs[1];
     t.is(datumReq.method, 'GET');
