@@ -350,7 +350,7 @@ class DatumLoader extends JsonClientSupport {
 					if ( incMode ) {
 						this.handleResults(undefined, nextOffset < 1, pagination);
 					}
-				} else {
+				} else if ( !q ) {
 					this._results = this._results.concat(dataArray);
 				}
 
@@ -362,7 +362,14 @@ class DatumLoader extends JsonClientSupport {
 							for ( let pOffset = nextOffset; pOffset < totalResults; pOffset += pagination.max ) {
 								this.loadData(pagination.withOffset(pOffset));
 							}
-							q.awaitAll((error) => {
+							q.awaitAll((error, allResults) => {
+								if ( !error ) {
+									allResults.map(function(qJson) {
+										return datumExtractor(qJson) || [];
+									}).forEach(resultArray => {
+										this._results = this._results.concat(resultArray);
+									});
+								}
 								this.handleResults(error !== null ? error : undefined, true);
 							});
 						}
