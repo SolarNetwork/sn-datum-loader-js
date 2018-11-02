@@ -32,7 +32,7 @@ import JsonClientSupport from './jsonClientSupport';
  * 
  * This object is designed to be used once per query. After creating the object and configuring an
  * asynchronous callback function with {@link DatumLoader#callback}, call {@link DatumLoader#load}
- * to startloading the data. The callback function will be called once all data has been loaded. The
+ * to start loading the data. The callback function will be called once all data has been loaded. The
  * callback function can also be passed as an argument to the {@link DatumLoader#load} method directly.
  * 
  * @implements {Loader}
