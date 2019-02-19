@@ -45,6 +45,8 @@
     "prebuild": "eslint lib.js src",
     "build": "rm -rf build && mkdir build && rollup --banner \"$(preamble)\" -c -f umd -n sn -m -o lib/solarnetwork-datum-loader.js -- lib.js && rollup --banner \"$(preamble)\" -c -f es -m -o lib/solarnetwork-datum-loader.es.js -- lib.js",
     "postbuild": "./node_modules/uglify-es/bin/uglifyjs --preamble \"$(preamble)\" lib/solarnetwork-datum-loader.js --source-map content=lib/solarnetwork-datum-loader.js.map,filename=lib/solarnetwork-datum-loader.min.js.map -c -m -o lib/solarnetwork-datum-loader.min.js && ./node_modules/uglify-es/bin/uglifyjs --preamble \"$(preamble)\" lib/solarnetwork-datum-loader.es.js --source-map content=lib/solarnetwork-datum-loader.es.js.map,filename=lib/solarnetwork-datum-loader.es.min.js.map -c -m -o lib/solarnetwork-datum-loader.es.min.js",
+    "prettier": "prettier \"src/**/*.js\" --check",
+    "prettier:write": "prettier \"src/**/*.js\" --write",
     "test": "ava",
     "coverage": "nyc --reporter=html ./node_modules/.bin/ava",
     "release": "generate-release --current-version \"$(bin/remove-preid)\""
@@ -54,6 +56,7 @@
       "no_confirm": false,
       "remote": "origin",
       "pre_commit_commands": [
+        "npm run prettier:write",
         "npm run build"
       ],
       "post_commit_commands": [
@@ -85,6 +88,7 @@
     "npmversion": "^1.4.0",
     "nyc": "^11.0.3",
     "package-preamble": "0.1",
+    "prettier": "^1.16.4",
     "rollup": "0.43",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-includepaths": "^0.2.2",
