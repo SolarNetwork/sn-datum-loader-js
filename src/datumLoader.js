@@ -1,5 +1,6 @@
 import {
 	DatumFilter,
+	DatumReadingTypes,
 	HttpHeaders,
 	Logger as log,
 	NodeDatumUrlHelper,
@@ -27,8 +28,9 @@ import JsonClientSupport from './jsonClientSupport';
  */
 
 /**
- * Load data for a set of source IDs, date range, and aggregate level using the `listDatumUrl()` endpoint
- * of `NodeDatumUrlHelperMixin`.
+ * Load data for a set of source IDs, date range, and aggregate level using either the `listDatumUrl()`
+ * or `datumReadingUrl()` URLs of `NodeDatumUrlHelperMixin` (the `/datum/list` or `/datum/reading`
+ * endpoints).
  * 
  * This object is designed to be used once per query. After creating the object and configuring an
  * asynchronous callback function with {@link DatumLoader#callback}, call {@link DatumLoader#load}
@@ -116,6 +118,13 @@ class DatumLoader extends JsonClientSupport {
 		 * @private
 		 */
 		this._incrementalMode = false;
+
+		/**
+		 * When `true` then invoke the `/datum/reading` endpoint to load data, otherwise use `/datum/list`.
+		 * @type {boolean}
+		 * @private
+		 */
+		this._readingsMode = false;
 
 		/**
 		 * When > 0 then make one request that includes the total result count and first page of
@@ -248,6 +257,24 @@ class DatumLoader extends JsonClientSupport {
 	}
 
 	/**
+	 * Get or set _readings mode_ for loading the data.
+	 * 
+	 * When readings mode is enabled (set to `true`) then the `/datum/reading` endpoint will be invoked
+	 * to load data.
+	 * 
+	 * When readings mode is disabled (set to `false`, the default) then the `/datum/list` endpoint will
+	 * be invoked to load data.
+	 * 
+	 * @param {boolean} [value] the readings mode to set 
+	 * @returns {boolean|DatumLoader} when used a a getter, the readings mode; otherwise this object
+	 */
+	readings(value) {
+		if ( value === undefined ) return this._readingsMode;
+		this._readingsMode = !!value;
+		return this;
+	}
+
+	/**
 	 * Initiate loading the data.
 	 * 
 	 * As an alternative to configuring the callback function via the {@link DatumLoader#callback}
@@ -310,7 +337,9 @@ class DatumLoader extends JsonClientSupport {
 		queryFilter.withoutTotalResultsCount = ((this._includeTotalResultsCount || q) && pagination.offset === 0 
 			? false : true);
 
-		let url = this.urlHelper.listDatumUrl(queryFilter, undefined, pagination);
+		let url = (this._readingsMode
+			? this.urlHelper.datumReadingUrl(queryFilter, DatumReadingTypes.Difference, undefined, undefined, pagination)
+			: this.urlHelper.listDatumUrl(queryFilter, undefined, pagination));
 		if ( this._urlParameters ) {
 			let queryParams = urlQuery.urlQueryEncode(this._urlParameters);
 			if ( queryParams ) {
