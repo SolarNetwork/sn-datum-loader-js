@@ -49,7 +49,7 @@ import JsonClientSupport from "./jsonClientSupport";
  * new DatumLoader(urlHelper, filter).load((error, results) => {
  *   // results is an array of Datum objects
  * });
- * @version 1.1.0
+ * @version 1.2.0
  */
 class DatumLoader extends JsonClientSupport {
 	/**
@@ -71,7 +71,7 @@ class DatumLoader extends JsonClientSupport {
 			 * @readonly
 			 * @type {string}
 			 */
-			version: { value: "1.1.0" }
+			version: { value: "1.2.0" }
 		});
 
 		/** @type {NodeDatumUrlHelper} */
