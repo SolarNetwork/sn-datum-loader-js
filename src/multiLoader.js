@@ -1,4 +1,4 @@
-import { queue } from 'd3-queue';
+import { queue } from "d3-queue";
 
 /**
  * Interface for classes that can be used to load data for {@link MultiLoader}.
@@ -6,9 +6,9 @@ import { queue } from 'd3-queue';
  * @interface Loader
  */
 
- /**
+/**
  * The loader callback function.
- * 
+ *
  * @callback Loader~dataCallback
  * @param {Error} [error] an error if a failure occurred
  * @param {Object} data the result data
@@ -25,7 +25,7 @@ import { queue } from 'd3-queue';
 
 /**
  * The data callback function.
- * 
+ *
  * @callback MultiLoader~dataCallback
  * @param {Error} [error] an error if a failure occurred
  * @param {Object[]} data the result data from all loaders
@@ -34,47 +34,46 @@ import { queue } from 'd3-queue';
 /**
  * Load data from multiple {@link Loader} objects, invoking a callback function
  * after all data has been loaded. Call {@link MultiLoader#load} to start loading the data.
- * 
+ *
  * The {@link DatumLoader} class conforms to the {@link Loader} interface, so can be used to
  * load arrays of {@link Datum} objects based on search criteria.
- * 
+ *
  * @example
  * const filter1 = new DatumFilter();
  * filter1.nodeId = 123;
  * // configure other filter settings here...
- * 
+ *
  * const filter2 = new DatumFilter();
  * filter2.nodeId = 234;
  * // configure other filter settings here
- * 
+ *
  * const urlHelper = new NodeDatumUrlHelper();
- * 
+ *
  * new MultiLoader([
  *   new DatumLoader(urlHelper, filter1),
  *   new DatumLoader(urlHelper, filter2),
  * ]).load((error, results) => {
  *   // results is a 2-element array of Datum arrays
  * });
- * 
+ *
  * @version 1.1.0
  */
 class MultiLoader {
-    
 	/**
 	 * Constructor.
 	 *
 	 * @param {Loader[]} loaders - array of loader objects
 	 */
-    constructor(loaders) {
-        Object.defineProperties(this, {
-                /**
-                 * The class version.
-                 * 
-                 * @memberof MultiLoader
-                 * @readonly
-                 * @type {string}
-                 */
-                version: { value: '1.1.0' }
+	constructor(loaders) {
+		Object.defineProperties(this, {
+			/**
+			 * The class version.
+			 *
+			 * @memberof MultiLoader
+			 * @readonly
+			 * @type {string}
+			 */
+			version: { value: "1.1.0" }
 		});
 
 		/**
@@ -82,7 +81,7 @@ class MultiLoader {
 		 * @private
 		 */
 		this._loaders = loaders;
-		
+
 		/**
 		 * @type {MultiLoader~dataCallback}
 		 * @private
@@ -95,43 +94,45 @@ class MultiLoader {
 		 */
 		this._concurrency = Infinity;
 	}
-	
+
 	/**
 	 * Get or set the concurrency limit to use for requets.
-	 * 
+	 *
 	 * A default, infinite concurrency queue will be used by default.
-	 * 
+	 *
 	 * @param {number} [value] the concurrency level to use, or `Infinity` for no limit
 	 * @returns {number|MultiLoader} when used as a getter, the current concurrency value, otherwise this object
 	 * @since 1.1.0
 	 */
 	concurrency(value) {
-		if ( value === undefined ) { return this._concurrency; }
+		if (value === undefined) {
+			return this._concurrency;
+		}
 		var n = Number(value);
-		if ( !isNaN(value) && n > 0 ) {
+		if (!isNaN(value) && n > 0) {
 			this._concurrency = n;
 		}
 		return this;
 	}
 
-    /**
-     * Asynchronously load the data.
-     * 
-     * This method calls {@link MultiLoader#load} to perform the actual work.
-     * 
-     * @returns {Promise<Object[]>} the result promise
-     */
-    fetch() {
-        return new Promise((resolve, reject) => {
-            this.load((error, results) => {
-                if ( error ) {
-                    reject(error);
-                } else {
-                    resolve(results);
-                }
-            });
-        });
-    }
+	/**
+	 * Asynchronously load the data.
+	 *
+	 * This method calls {@link MultiLoader#load} to perform the actual work.
+	 *
+	 * @returns {Promise<Object[]>} the result promise
+	 */
+	fetch() {
+		return new Promise((resolve, reject) => {
+			this.load((error, results) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve(results);
+				}
+			});
+		});
+	}
 
 	/**
 	 * Initiate loading the data. This will call {@link Loader#load} on each
@@ -145,16 +146,16 @@ class MultiLoader {
 	 */
 	load(callback) {
 		// to support queue use, allow callback to be passed directly to this function
-		if ( typeof callback === 'function' ) {
+		if (typeof callback === "function") {
 			this._finishedCallback = callback;
 		}
 		const q = queue(this._concurrency);
-		this._loaders.forEach((loader) => {
+		this._loaders.forEach(loader => {
 			// queue.defer will invoke the callback with a `null` `this` object, so `e.load.bind` here
 			q.defer(loader.load.bind(loader));
 		});
 		q.awaitAll((error, results) => {
-			if ( this._finishedCallback ) {
+			if (this._finishedCallback) {
 				this._finishedCallback.call(this, error, results);
 			}
 		});
@@ -170,13 +171,14 @@ class MultiLoader {
 	 * @returns  {MultiLoader~dataCallback|MultiLoader} when used as a getter, the current callback function, otherwise this object
 	 */
 	callback(value) {
-		if ( !value ) { return this._finishedCallback; }
-		if ( typeof value === 'function' ) {
+		if (!value) {
+			return this._finishedCallback;
+		}
+		if (typeof value === "function") {
 			this._finishedCallback = value;
 		}
 		return this;
 	}
-
 }
 
 export default MultiLoader;
