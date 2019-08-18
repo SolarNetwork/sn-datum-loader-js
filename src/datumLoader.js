@@ -292,16 +292,16 @@ class DatumLoader extends JsonClientSupport {
 	 *
 	 * This can be configured as an absolute URL to the proxy server to use instead of making requests
 	 * directly to the URL returned by the configured `NodeDatumUrlHelperMixin`. For example:
-	 * 
+	 *
 	 * * https://query.solarnetwork.net
 	 * * https://query.solarnetwork.net/1m
-	 * 
+	 *
 	 * @param {string} [value] the proxy URL to set, or `null` or an empty string to not use any proxy
 	 * @returns {string|DatumLoader} when used a a getter, the readings mode; otherwise this object
 	 */
 	proxyUrl(value) {
 		if (value === undefined) return this._proxyUrl;
-		this._proxyUrl = (value ? value : undefined);
+		this._proxyUrl = value ? value : undefined;
 		return this;
 	}
 
