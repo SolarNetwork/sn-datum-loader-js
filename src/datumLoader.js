@@ -128,6 +128,14 @@ class DatumLoader extends JsonClientSupport {
 		this._readingsMode = false;
 
 		/**
+		 * An optional proxy URL to use instead of the host returned by the configured `NodeDatumUrlHelperMixin`.
+		 * This should be configured as an absolute URL to the proxy target, e.g. `https://query.solarnetwork.net/1m`.
+		 * @type {string}
+		 * @private
+		 */
+		this._proxyUrl = undefined;
+
+		/**
 		 * When > 0 then make one request that includes the total result count and first page of
 		 * results, followed by parallel requests for the remaining pages.
 		 * @type {number}
@@ -280,6 +288,24 @@ class DatumLoader extends JsonClientSupport {
 	}
 
 	/**
+	 * Get or set the URL to a proxy to use for loading the data.
+	 *
+	 * This can be configured as an absolute URL to the proxy server to use instead of making requests
+	 * directly to the URL returned by the configured `NodeDatumUrlHelperMixin`. For example:
+	 * 
+	 * * https://query.solarnetwork.net
+	 * * https://query.solarnetwork.net/1m
+	 * 
+	 * @param {string} [value] the proxy URL to set, or `null` or an empty string to not use any proxy
+	 * @returns {string|DatumLoader} when used a a getter, the readings mode; otherwise this object
+	 */
+	proxyUrl(value) {
+		if (value === undefined) return this._proxyUrl;
+		this._proxyUrl = (value ? value : undefined);
+		return this;
+	}
+
+	/**
 	 * Initiate loading the data.
 	 *
 	 * As an alternative to configuring the callback function via the {@link DatumLoader#callback}
@@ -351,6 +377,9 @@ class DatumLoader extends JsonClientSupport {
 					pagination
 			  )
 			: this.urlHelper.listDatumUrl(queryFilter, undefined, pagination);
+		if (this._proxyUrl) {
+			url = url.replace(/^[^:]+:\/\/[^\/]+/, this._proxyUrl);
+		}
 		if (this._urlParameters) {
 			let queryParams = urlQuery.urlQueryEncode(this._urlParameters);
 			if (queryParams) {
