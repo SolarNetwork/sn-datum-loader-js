@@ -799,10 +799,10 @@ test.serial.cb("load:onePage:parallel", t => {
 	t.is(reqs.length, 1); // no more requests
 });
 
-test.serial.cb("load:onePage:proxy", t => {
+test.serial.cb("load:proxy:onePage", t => {
 	const filter = testFilter();
-	const loader = new DatumLoader(t.context.urlHelper, filter).client(t.context.reqJson);
-	loader.proxyUrl('https://query-proxy/path');
+	const loader = new DatumLoader(t.context.urlHelper, filter).client(t.context.reqJson)
+		.proxyUrl('https://query-proxy/path');
 	t.truthy(loader);
 
 	const expectedRequestResults = [
@@ -831,4 +831,118 @@ test.serial.cb("load:onePage:proxy", t => {
 		Accept: "application/json"
 	});
 	datumReq.respond(200, { "Content-Type": "application/json" }, expectedRequestResults[0]);
+});
+
+test.serial.cb("load:proxy:onePage:sec", t => {
+	const urlHelper = t.context.urlHelper;
+	const auth = authBuilder(urlHelper.environment);
+	const filter = testFilter();
+	const loader = new DatumLoader(t.context.urlHelper, filter, auth).client(t.context.reqJson)
+		.proxyUrl('https://query-proxy/path');
+	t.truthy(loader);
+
+	const expectedRequestResults = [
+		'{"success":true,"data":' +
+			'{"totalResults": 1, "startingOffset": 0, "returnedResultCount": 1, "results": [' +
+			'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0}' +
+			"]}}"
+	];
+
+	const expected = JSON.parse(expectedRequestResults[0]).data.results;
+
+	loader.load(successSingleCallbackTestCompletion(t, expected));
+
+	/** @type {sinon.SinonFakeXMLHttpRequest[]} */
+	const reqs = t.context.requests;
+
+	t.is(reqs.length, 1);
+
+	const datumReq = reqs[0];
+	t.is(datumReq.method, "GET");
+	t.is(
+		datumReq.url,
+		"https://query-proxy/path/solarquery/api/v1/sec/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=1000"
+	);
+	t.deepEqual(datumReq.requestHeaders, {
+		Accept: "application/json",
+		"X-SN-Date": TEST_DATE_STR,
+		Authorization:
+			"SNWS2 Credential=test-token,SignedHeaders=host;x-sn-date,Signature=52b465e297f097b20351da727abb3e4a4695a2ac5f3745da27973ad623d5f5ac"
+	});
+	datumReq.respond(200, { "Content-Type": "application/json" }, expectedRequestResults[0]);
+});
+
+test.serial.cb("load:proxy:multiPage:parallel", t => {
+	const filter = testFilter();
+	const loader = new DatumLoader(t.context.urlHelper, filter)
+		.proxyUrl('https://query-proxy/path')
+		.client(t.context.reqJson)
+		.paginationSize(2)
+		.concurrency(Infinity)
+		.includeTotalResultsCount(true);
+	t.truthy(loader);
+
+	const expectedRequestResults = [
+		'{"success":true,"data":' +
+			'{"totalResults": 6, "startingOffset": 0, "returnedResultCount": 2, "results": [' +
+			'{"created": "2017-07-04 12:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},' +
+			'{"created": "2017-07-04 13:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}' +
+			"]}}",
+		'{"success":true,"data":' +
+			'{"totalResults": null, "startingOffset": 2, "returnedResultCount": 2, "results": [' +
+			'{"created": "2017-07-04 14:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},' +
+			'{"created": "2017-07-04 15:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}' +
+			"]}}",
+		'{"success":true,"data":' +
+			'{"totalResults": null, "startingOffset": 4, "returnedResultCount": 2, "results": [' +
+			'{"created": "2017-07-04 16:00:00.000Z","nodeId":123,"sourceId":"test-source","val":0},' +
+			'{"created": "2017-07-04 17:00:00.000Z","nodeId":123,"sourceId":"test-source","val":1}' +
+			"]}}"
+	];
+
+	const expected = JSON.parse(expectedRequestResults[0])
+		.data.results.concat(JSON.parse(expectedRequestResults[1]).data.results)
+		.concat(JSON.parse(expectedRequestResults[2]).data.results);
+
+	loader.load(successSingleCallbackTestCompletion(t, expected));
+
+	/** @type {sinon.SinonFakeXMLHttpRequest[]} */
+	const reqs = t.context.requests;
+
+	t.is(reqs.length, 1);
+
+	let datumReq = reqs[0];
+	t.is(datumReq.method, "GET");
+	t.is(
+		datumReq.url,
+		"https://query-proxy/path/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=false&max=2"
+	);
+	t.deepEqual(datumReq.requestHeaders, {
+		Accept: "application/json"
+	});
+	datumReq.respond(200, { "Content-Type": "application/json" }, expectedRequestResults[0]);
+
+	t.is(reqs.length, 3); // note jump to three for parallel
+
+	datumReq = reqs[1];
+	t.is(datumReq.method, "GET");
+	t.is(
+		datumReq.url,
+		"https://query-proxy/path/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=2"
+	);
+	t.deepEqual(datumReq.requestHeaders, {
+		Accept: "application/json"
+	});
+	datumReq.respond(200, { "Content-Type": "application/json" }, expectedRequestResults[1]);
+
+	datumReq = reqs[2];
+	t.is(datumReq.method, "GET");
+	t.is(
+		datumReq.url,
+		"https://query-proxy/path/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=4"
+	);
+	t.deepEqual(datumReq.requestHeaders, {
+		Accept: "application/json"
+	});
+	datumReq.respond(200, { "Content-Type": "application/json" }, expectedRequestResults[2]);
 });
