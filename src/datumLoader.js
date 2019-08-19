@@ -377,17 +377,15 @@ class DatumLoader extends JsonClientSupport {
 					pagination
 			  )
 			: this.urlHelper.listDatumUrl(queryFilter, undefined, pagination);
-		if (this._proxyUrl) {
-			url = url.replace(/^[^:]+:\/\/[^\/]+/, this._proxyUrl);
-		}
 		if (this._urlParameters) {
 			let queryParams = urlQuery.urlQueryEncode(this._urlParameters);
 			if (queryParams) {
 				url += "&" + queryParams;
 			}
 		}
+		let reqUrl = (this._proxyUrl ? url.replace(/^[^:]+:\/\/[^\/]+/, this._proxyUrl) : url);
 		const jsonClient = this.client();
-		const req = jsonClient(url)
+		const req = jsonClient(reqUrl)
 			.on("beforesend", request => {
 				if (auth && auth.signingKeyValid) {
 					auth.reset()
@@ -400,7 +398,7 @@ class DatumLoader extends JsonClientSupport {
 			.on("load", json => {
 				let dataArray = datumExtractor(json);
 				if (dataArray === undefined) {
-					log.debug("No data available for %s", url);
+					log.debug("No data available for %s", reqUrl);
 					this.handleResults();
 					return;
 				}
@@ -459,8 +457,8 @@ class DatumLoader extends JsonClientSupport {
 				}
 			})
 			.on("error", error => {
-				log.error("Error requesting data for %s: %s", url, error);
-				this.handleResults(new Error(`Error requesting data for ${url}: ${error}`));
+				log.error("Error requesting data for %s: %s", reqUrl, error);
+				this.handleResults(new Error(`Error requesting data for ${reqUrl}: ${error}`));
 			});
 		if (q && pagination.offset > 0) {
 			q.defer(req.get, null);
