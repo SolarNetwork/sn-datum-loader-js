@@ -383,7 +383,7 @@ class DatumLoader extends JsonClientSupport {
 				url += "&" + queryParams;
 			}
 		}
-		let reqUrl = (this._proxyUrl ? url.replace(/^[^:]+:\/\/[^\/]+/, this._proxyUrl) : url);
+		let reqUrl = this._proxyUrl ? url.replace(/^[^:]+:\/\/[^\/]+/, this._proxyUrl) : url;
 		const jsonClient = this.client();
 		const req = jsonClient(reqUrl)
 			.on("beforesend", request => {
