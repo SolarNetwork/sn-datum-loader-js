@@ -1,6 +1,6 @@
 {
   "name": "solarnetwork-datum-loader",
-  "version": "0.10.2",
+  "version": "0.10.3-dev.0",
   "description": "SolarNetwork Datum Loader",
   "keywords": [
     "solarnetwork"
