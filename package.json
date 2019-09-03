@@ -1,6 +1,6 @@
 {
   "name": "solarnetwork-datum-loader",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "SolarNetwork Datum Loader",
   "keywords": [
     "solarnetwork"
@@ -8,8 +8,8 @@
   "homepage": "https://github.com/SolarNetwork/sn-datum-loader-js",
   "license": "Apache-2.0",
   "author": {
-    "name": "Matt Magoffin",
-    "email": "matt@solarnetwork.net"
+    "name": "SolarNetwork Foundation",
+    "email": "code@solarnetwork.net"
   },
   "main": "lib/solarnetwork-datum-loader.js",
   "module": "lib/solarnetwork-datum-loader.es.js",
@@ -24,13 +24,12 @@
     "url": "https://github.com/SolarNetwork/sn-datum-loader-js.git"
   },
   "ava": {
-    "source": [
+    "sources": [
       "src/**/*.js"
     ],
     "require": [
-      "babel-register"
-    ],
-    "babel": "inherit"
+      "@babel/register"
+    ]
   },
   "babel": {
     "presets": [
@@ -73,27 +72,26 @@
     }
   },
   "devDependencies": {
-    "ava": "^0.25.0",
-    "babel-core": "^6.24.1",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-plugin-rewire": "^1.1.0",
-    "babel-preset-env": "^1.6.0",
-    "babel-register": "^6.24.1",
+    "ava": "^1.4.1",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/register": "^7.5.5",
+    "@babel/plugin-external-helpers": "^7.2.0",
+    "babel-plugin-rewire": "^1.2.0",
     "eslint": "3",
-    "generate-release": "^1.1.0",
+    "generate-release": "^1.1.1",
     "global-object": "^1.0.0",
-    "ink-docstrap": "^1.3.0",
-    "istanbul": "^0.4.5",
-    "jsdoc": "jsdoc3/jsdoc#3.5.5",
+    "ink-docstrap": "^1.3.2",
+    "jsdoc": "^3.6.3",
     "npmversion": "^1.4.0",
-    "nyc": "^11.0.3",
+    "nyc": "^14.1.1",
     "package-preamble": "0.1",
     "prettier": "^1.16.4",
-    "rollup": "0.43",
-    "rollup-plugin-babel": "^2.7.1",
-    "rollup-plugin-includepaths": "^0.2.2",
+    "rollup": "^1.20.2",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-includepaths": "^0.2.3",
     "semver": "^5.3.0",
-    "sinon": "^2.3.8",
+    "sinon": "^7.4.2",
     "solarnetwork-test-utils": "0.1",
     "uglify-es": "^3.0.25"
   },
