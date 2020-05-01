@@ -4327,10 +4327,10 @@ solarnetwork-api-core@0.6:
     d3-time-format "^2.0.5"
     uri-js "^3.0.2"
 
-solarnetwork-api-core@>=0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/solarnetwork-api-core/-/solarnetwork-api-core-0.17.0.tgz#2d6ecf21060250c237197cd2b12aa636b69b6e1e"
-  integrity sha512-QwDDAnJ09ACYAZMrMwIQZAHmrYh+gHraogrqwyCAYDQUfokfZXuQEzOw1BKw/oWKvK80b1QLbwsp917iSqdXew==
+solarnetwork-api-core@>=0.23.0:
+  version "0.23.0"
+  resolved "https://registry.yarnpkg.com/solarnetwork-api-core/-/solarnetwork-api-core-0.23.0.tgz#18ef5494102adb50640b0be40a3db716654e964c"
+  integrity sha512-/0ONIGEMfHxi/elTD3AvddORyGZbk/r5/KVXxL/zxoAEtVAxxL5lQCBnEAZIeIO+8Y+pGChcKNH7SHrhBiVgoA==
   dependencies:
     crypto-js "^3.1.9-1"
     d3-array "^1.2.1"
