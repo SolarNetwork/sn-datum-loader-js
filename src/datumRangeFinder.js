@@ -112,7 +112,7 @@ class DatumRangeFinder extends JsonClientSupport {
 				if (auth && auth.signingKeyValid) {
 					auth.reset()
 						.snDate(true)
-						.url(url);
+						.url(url, true);
 					request.setRequestHeader(HttpHeaders.X_SN_DATE, auth.requestDateHeaderValue);
 					request.setRequestHeader(HttpHeaders.AUTHORIZATION, auth.buildWithSavedKey());
 				}

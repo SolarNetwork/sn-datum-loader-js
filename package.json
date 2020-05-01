@@ -1,6 +1,6 @@
 {
   "name": "solarnetwork-datum-loader",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "description": "SolarNetwork Datum Loader",
   "keywords": [
     "solarnetwork"
@@ -83,7 +83,7 @@
     "global-object": "^1.0.0",
     "ink-docstrap": "^1.3.2",
     "jsdoc": "^3.6.3",
-    "npmversion": "^1.4.0",
+    "npmversion": "^1.7.0",
     "nyc": "^14.1.1",
     "package-preamble": "0.1",
     "prettier": "^1.16.4",
@@ -98,6 +98,6 @@
   "dependencies": {
     "d3-queue": "^3.0.7",
     "d3-request": "^1.0.5",
-    "solarnetwork-api-core": ">=0.17.0"
+    "solarnetwork-api-core": ">=0.23.0"
   }
 }
