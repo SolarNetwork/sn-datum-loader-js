@@ -477,6 +477,7 @@ class DatumLoader extends JsonClientSupport {
  */
 function datumExtractor(json) {
 	if (
+		!json ||
 		json.success !== true ||
 		json.data === undefined ||
 		Array.isArray(json.data.results) !== true
