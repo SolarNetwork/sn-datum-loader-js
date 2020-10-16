@@ -399,13 +399,15 @@ class DatumLoader extends JsonClientSupport {
 				let dataArray = datumExtractor(json);
 				if (dataArray === undefined) {
 					log.debug("No data available for %s", reqUrl);
-					this.handleResults();
-					return;
+					if (!q) {
+						this.handleResults();
+						return;
+					}
 				}
 
 				const incMode = this._incrementalMode;
 				const nextOffset = offsetExtractor(json, pagination);
-				const totalResults = json.data ? json.data.totalResults : null;
+				const totalResults = json && json.data ? json.data.totalResults : null;
 
 				if (this._results === undefined || incMode) {
 					this._results = dataArray;
@@ -437,6 +439,19 @@ class DatumLoader extends JsonClientSupport {
 								this.loadData(pagination.withOffset(pOffset));
 							}
 							q.awaitAll((error, allResults) => {
+								if (
+									!error &&
+									allResults &&
+									allResults.findIndex(el => el === undefined) >= 0
+								) {
+									// some result is unexpectedly undefined; seen this under Node from
+									// https://github.com/driverdan/node-XMLHttpRequest/issues/162
+									// where the HTTP client lib is not reporting back an actual error value
+									// when something happens like a response timeout
+									error = new Error(
+										"One or more requests did not return a result, but no error was reported."
+									);
+								}
 								if (!error) {
 									allResults
 										.map(function(qJson) {
@@ -495,6 +510,9 @@ function datumExtractor(json) {
  * @private
  */
 function pageSizeExtractor(json) {
+	if (!(json && json.data)) {
+		return 0;
+	}
 	const data = json.data;
 	return data.returnedResultCount + data.startingOffset < data.totalResults
 		? data.returnedResultCount
@@ -515,6 +533,9 @@ function pageSizeExtractor(json) {
  * @private
  */
 function offsetExtractor(json, page) {
+	if (!(json && json.data)) {
+		return 0;
+	}
 	const data = json.data;
 	if (page && page.max) {
 		// don't bother with totalResults; just keep going unless returnedResultCount < page.max

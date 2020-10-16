@@ -1,6 +1,6 @@
 {
   "name": "solarnetwork-datum-loader",
-  "version": "0.10.5",
+  "version": "0.10.6",
   "description": "SolarNetwork Datum Loader",
   "keywords": [
     "solarnetwork"
@@ -72,11 +72,11 @@
     }
   },
   "devDependencies": {
-    "ava": "^1.4.1",
     "@babel/core": "^7.2.2",
+    "@babel/plugin-external-helpers": "^7.2.0",
     "@babel/preset-env": "^7.3.1",
     "@babel/register": "^7.5.5",
-    "@babel/plugin-external-helpers": "^7.2.0",
+    "ava": "^1.4.1",
     "babel-plugin-rewire": "^1.2.0",
     "eslint": "^4.18.2",
     "generate-release": "^1.1.1",
@@ -92,7 +92,7 @@
     "rollup-plugin-includepaths": "^0.2.3",
     "semver": "^5.3.0",
     "sinon": "^7.4.2",
-    "solarnetwork-test-utils": "0.1",
+    "solarnetwork-test-utils": "^0.2.2",
     "uglify-es": "^3.0.25"
   },
   "dependencies": {
