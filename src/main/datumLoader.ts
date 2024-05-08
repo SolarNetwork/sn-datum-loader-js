@@ -436,7 +436,6 @@ class DatumLoader
 	 * @param q the queue to use
 	 */
 	#loadData(page: Pagination, q?: Queue): void {
-		//const auth = this.authBuilder;
 		const queryFilter = new DatumFilter(this.filter);
 		queryFilter.withoutTotalResultsCount =
 			(this.#includeTotalResultsCount || q) && page.offset === 0
