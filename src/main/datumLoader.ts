@@ -7,12 +7,10 @@ import {
 import { Logger as log } from "solarnetwork-api-core/lib/util/index.js";
 import {
 	AuthorizationV2Builder,
-	HttpHeaders,
 	SolarQueryApi,
 	Urls,
 } from "solarnetwork-api-core/lib/net/index.js";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
-import fetch from "./fetch.js";
 import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
 
 /**
@@ -23,15 +21,6 @@ interface QueryResultsData {
 	returnedResultCount: number;
 	startingOffset: number;
 	results?: Datum[];
-}
-
-/**
- * Query results.
- */
-interface QueryResults {
-	reqUrl: string;
-	success: boolean;
-	data?: QueryResultsData;
 }
 
 const DEFAULT_PAGE_SIZE: number = 1000;
@@ -447,7 +436,7 @@ class DatumLoader
 	 * @param q the queue to use
 	 */
 	#loadData(page: Pagination, q?: Queue): void {
-		const auth = this.authBuilder;
+		//const auth = this.authBuilder;
 		const queryFilter = new DatumFilter(this.filter);
 		queryFilter.withoutTotalResultsCount =
 			(this.#includeTotalResultsCount || q) && page.offset === 0
@@ -473,125 +462,98 @@ class DatumLoader
 			? url.replace(/^[^:]+:\/\/[^/]+/, this.#proxyUrl)
 			: url;
 
-		const req = (cb?: LoaderDataCallbackFn<Datum[]>) => {
-			const headers: any = {
-				Accept: "application/json",
-			};
-			if (auth && auth.signingKeyValid) {
-				headers[HttpHeaders.AUTHORIZATION] = auth
-					.reset()
-					.snDate(true)
-					.url(url, true)
-					.buildWithSavedKey();
-				headers[HttpHeaders.X_SN_DATE] = auth.requestDateHeaderValue;
-			}
+		const query = this.requestor<QueryResultsData>(reqUrl, url);
 
-			const errorHandler = (error: any) => {
-				log.error("Error requesting data for %s: %s", reqUrl, error);
-				this.#handleResults(
-					new Error(`Error requesting data for ${reqUrl}: ${error}`),
-					true
-				);
-				if (cb) {
-					cb(error);
-				}
-			};
-
-			fetch(reqUrl, {
-				headers: headers,
-			}).then((res) => {
-				if (!res.ok) {
-					errorHandler(res.statusText);
+		const handler = (error?: Error, data?: QueryResultsData) => {
+			if (error) {
+				if (!q) {
+					this.#handleResults(error, true);
 					return;
 				}
+			}
+			const dataArray = datumExtractor(data);
+			if (dataArray === undefined) {
+				log.debug("No data available for %s", reqUrl);
+				if (!q) {
+					this.#handleResults(undefined, true);
+					return;
+				}
+			}
 
-				res.json().then((json) => {
-					const dataArray = datumExtractor(json);
-					if (dataArray === undefined) {
-						log.debug("No data available for %s", reqUrl);
-						if (!cb) {
-							this.#handleResults(undefined, true);
-							return;
+			const incMode = this.#incrementalMode;
+			const nextOffset = offsetExtractor(data, page);
+			const done = !!q || nextOffset < 1;
+			const totalResults: number =
+				data && data.totalResults !== undefined ? data.totalResults : 0;
+
+			if (!q && dataArray) {
+				this.#results =
+					this.#results === undefined
+						? dataArray
+						: this.#results.concat(dataArray);
+			}
+
+			if (incMode || (!q && done)) {
+				this.#handleResults(undefined, done, page);
+			}
+
+			// load additional pages as needed
+			if (!done) {
+				if (!q && this.#queue && totalResults > 0) {
+					// parallel mode after first page results; queue all remaining pages
+					for (
+						let pOffset = nextOffset;
+						pOffset < totalResults;
+						pOffset += page.max
+					) {
+						this.#loadData(page.withOffset(pOffset), this.#queue);
+					}
+					this.#queue.awaitAll((error, allResults) => {
+						const queryResults = allResults as QueryResultsData[];
+						if (
+							!error &&
+							queryResults &&
+							queryResults.findIndex((el) => el === undefined) >=
+								0
+						) {
+							// some result is unexpectedly undefined; seen this under Node from
+							// https://github.com/driverdan/node-XMLHttpRequest/issues/162
+							// where the HTTP client lib is not reporting back an actual error value
+							// when something happens like a response timeout
+							error = new Error(
+								"One or more requests did not return a result, but no error was reported."
+							);
 						}
-					}
-
-					const incMode = this.#incrementalMode;
-					const nextOffset = offsetExtractor(json, page);
-					const done = !!q || nextOffset < 1;
-					const totalResults: number =
-						json && json.data ? json.data.totalResults : null;
-
-					if (!q && dataArray) {
-						this.#results =
-							this.#results === undefined
-								? dataArray
-								: this.#results.concat(dataArray);
-					}
-
-					if (incMode || (!q && done)) {
-						this.#handleResults(undefined, done, page);
-					}
-
-					// load additional pages as needed
-					if (!done) {
-						if (!q && this.#queue && totalResults > 0) {
-							// parallel mode after first page results; queue all remaining pages
-							for (
-								let pOffset = nextOffset;
-								pOffset < totalResults;
-								pOffset += page.max
-							) {
-								this.#loadData(
-									page.withOffset(pOffset),
-									this.#queue
-								);
-							}
-							this.#queue.awaitAll((error, allResults) => {
-								if (
-									!error &&
-									allResults &&
-									allResults.findIndex(
-										(el) => el === undefined
-									) >= 0
-								) {
-									// some result is unexpectedly undefined; seen this under Node from
-									// https://github.com/driverdan/node-XMLHttpRequest/issues/162
-									// where the HTTP client lib is not reporting back an actual error value
-									// when something happens like a response timeout
-									error = new Error(
-										"One or more requests did not return a result, but no error was reported."
-									);
+						if (!error && queryResults) {
+							queryResults.forEach((queryResult) => {
+								const dataArray = datumExtractor(queryResult);
+								if (!dataArray) {
+									return;
 								}
-								if (!error && allResults) {
-									allResults.forEach((dataArray) => {
-										if (!this.#results) {
-											this.#results = dataArray;
-										} else {
-											this.#results =
-												this.#results.concat(dataArray);
-										}
-									});
+								if (!this.#results) {
+									this.#results = dataArray;
+								} else {
+									this.#results =
+										this.#results.concat(dataArray);
 								}
-								this.#handleResults(
-									error !== null ? error : undefined,
-									true
-								);
 							});
-						} else {
-							// serially move to next page
-							this.#loadData(page.withOffset(nextOffset));
 						}
-					}
-					if (cb) {
-						cb(undefined, dataArray);
-					}
-				}, errorHandler);
-			}, errorHandler);
+						this.#handleResults(
+							error !== null ? error : undefined,
+							true
+						);
+					});
+				} else {
+					// serially move to next page
+					this.#loadData(page.withOffset(nextOffset));
+				}
+			}
 		};
+
 		if (q) {
-			q.defer(req);
+			q.defer(query);
 		} else {
-			req();
+			query(handler);
 		}
 	}
 }
@@ -599,20 +561,14 @@ class DatumLoader
 /**
  * Extract the datum list from the returned data.
  *
- * @param json the JSON results to extract from
+ * @param data the JSON results to extract from
  * @returns the extracted data
- * @private
  */
-function datumExtractor(json: any): Datum[] | undefined {
-	if (
-		!json ||
-		json.success !== true ||
-		json.data === undefined ||
-		Array.isArray(json.data.results) !== true
-	) {
-		return undefined;
+function datumExtractor(data?: QueryResultsData): Datum[] | undefined {
+	if (Array.isArray(data?.results)) {
+		return data.results;
 	}
-	return json.data.results;
+	return undefined;
 }
 
 /**
@@ -623,16 +579,17 @@ function datumExtractor(json: any): Datum[] | undefined {
  * pagination will be based on `data.returnedResultCount` and will continue until
  * `data.totalResults` has been returned.
  *
- * @param json the JSON results to extract from
+ * @param data the JSON results to extract from
  * @param page the incremental mode page
  * @returns the extracted offset, or `0` if no more pages to return
- * @private
  */
-function offsetExtractor(json: QueryResults, page: Pagination): number {
-	if (!(json && json.data)) {
+function offsetExtractor(
+	data: QueryResultsData | undefined,
+	page: Pagination
+): number {
+	if (!data) {
 		return 0;
 	}
-	const data = json.data;
 	// don't bother with totalResults; just keep going unless returnedResultCount < page.max
 	return data.returnedResultCount < page.max
 		? 0

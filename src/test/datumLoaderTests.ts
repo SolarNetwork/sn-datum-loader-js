@@ -219,7 +219,7 @@ test.serial("load:proxy:multiPage:parallel:oneRequestReturnsNoData", (t) => {
 				t.truthy(error);
 				t.is(
 					error!.message,
-					"One or more requests did not return a result, but no error was reported."
+					"Error requesting data for https://query-proxy/path/solarquery/api/v1/pub/datum/list?nodeId=123&sourceId=test-source&startDate=2017-04-01T12%3A00&endDate=2017-05-01T12%3A00&aggregation=Hour&withoutTotalResultsCount=true&max=2&offset=2: non-success result returned"
 				);
 				t.truthy(results);
 				resolve();
