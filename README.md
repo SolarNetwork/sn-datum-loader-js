@@ -36,7 +36,7 @@ new DatumLoader(urlHelper, filter).fetch().then(results => {
 
 ## MultiLoader
 
-The `MultiLoader` class helps load data from multiple `Loader` objects (the 
+The `MultiLoader` class helps load data from multiple `Loader` objects (the
 `DatumLoader` class conforms to that interface). This is useful for pulling
 down data from different search criterias all in one go. For example:
 
@@ -44,13 +44,13 @@ down data from different search criterias all in one go. For example:
 const filter1 = new DatumFilter();
 filter1.nodeId = 123;
 filter1.sourceId = 'a'
- 
+
 const filter2 = new DatumFilter();
 filter2.nodeId = 234;
 filter2.sourceIds = ['b', 'c'];
- 
+
 const urlHelper = new NodeDatumUrlHelper();
- 
+
 new MultiLoader([
   new DatumLoader(urlHelper, filter1),
   new DatumLoader(urlHelper, filter2),
@@ -72,7 +72,7 @@ urlHelper.publicQuery = true;
 urlHelper.nodeId = 123;
 urlHelper.sourceIds = ['a', 'b'];
 
-const range = await new DatumRangeFinder(urlHelper).fetch(); 
+const range = await new DatumRangeFinder(urlHelper).fetch();
 ```
 
 Ranges for more complex queries can be accomplished by passing in an array of URL helper
@@ -110,5 +110,45 @@ filter.sourceId = '/power/**';
 const sources2 = await new DatumSourceFinder(urlHelper).filter(filter).fetch();
 ```
 
+# Building
+
+The build uses [NPM][npm] and requires Node 17+. First, initialize the dependencies:
+
+```sh
+npm ci
+```
+
+Then you can run the `build` script:
+
+```sh
+npm run build:dist
+```
+
+That will produce ES2022 modules with an entry point in `lib/index.js`.
+
+You can also produce an ES2022 bundle by running `npm run build:bundle`. That will produce a single
+bundled file at `lib/solarnetwork-datum-loader.es.js`.
+
+# Releases
+
+Releases are done using the gitflow branching model. Gitflow must be installed on your host system.
+Then you can run
+
+```shell
+npm run release
+```
+
+to version, build, commit, and publish the release. See the [generate-release][generate-release]
+site for more information.
+
+# Unit tests
+
+The unit tests can be run by running the `test` script:
+
+```sh
+npm test
+```
+
+That will output the test results and produce a HTML code coverage report at `coverage/index.html`.
 
  [datum-list]: https://github.com/SolarNetwork/solarnetwork/wiki/SolarQuery-API#datum-list
