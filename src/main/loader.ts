@@ -12,12 +12,12 @@ export interface Datum {
 /**
  * The data callback function.
  */
-export type DatumLoaderDataCallbackFn = (
+export type LoaderDataCallbackFn<T> = (
 	/** An error if a failure occurred. */
 	error?: Error,
 
 	/** The result data. */
-	data?: Datum[],
+	data?: T,
 
 	/** In incremental mode, will be `true` when invoked on the *last* page of data. */
 	done?: boolean,
@@ -29,11 +29,11 @@ export type DatumLoaderDataCallbackFn = (
 /**
  * API for a loader.
  */
-export interface Loader {
+export interface Loader<T> {
 	/**
 	 * Initiate loading the data.
 	 *
 	 * @param callback the callback function to provide the results to
 	 */
-	load(callback: DatumLoaderDataCallbackFn): any;
+	load(callback: LoaderDataCallbackFn<T>): any;
 }

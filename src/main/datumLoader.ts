@@ -13,7 +13,7 @@ import {
 } from "solarnetwork-api-core/lib/net/index.js";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import fetch from "./fetch.js";
-import { Datum, DatumLoaderDataCallbackFn, Loader } from "./loader.js";
+import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
 
 /**
  * Query results data.
@@ -55,13 +55,16 @@ const DEFAULT_PAGE_SIZE: number = 1000;
  *
  * @version 2.0.0
  */
-class DatumLoader extends JsonClientSupport<Datum[]> implements Loader {
+class DatumLoader
+	extends JsonClientSupport<Datum[]>
+	implements Loader<Datum[]>
+{
 	/** The filter. */
 	readonly filter: DatumFilter;
 
 	#pageSize: number;
 	#includeTotalResultsCount: boolean;
-	#callback: DatumLoaderDataCallbackFn | null;
+	#callback: LoaderDataCallbackFn<Datum[]> | null;
 	#urlParameters: object | null;
 
 	/**
@@ -116,10 +119,6 @@ class DatumLoader extends JsonClientSupport<Datum[]> implements Loader {
 
 		this.filter = filter;
 
-		if (!authBuilder) {
-			api.publicQuery = true;
-		}
-
 		this.#pageSize = DEFAULT_PAGE_SIZE;
 		this.#includeTotalResultsCount = false;
 		this.#callback = null;
@@ -168,7 +167,7 @@ class DatumLoader extends JsonClientSupport<Datum[]> implements Loader {
 	 *
 	 * @returns the current callback function or `null` if not defined
 	 */
-	callback(): DatumLoaderDataCallbackFn | null;
+	callback(): LoaderDataCallbackFn<Datum[]> | null;
 
 	/**
 	 * Set the callback function, invoked after all data has been loaded or after every result
@@ -181,11 +180,11 @@ class DatumLoader extends JsonClientSupport<Datum[]> implements Loader {
 	 * @param value the callback function to use, or `null` to remove the existing callback function
 	 * @returns this object
 	 */
-	callback(value: DatumLoaderDataCallbackFn | null): this;
+	callback(value: LoaderDataCallbackFn<Datum[]> | null): this;
 
 	callback(
-		value?: DatumLoaderDataCallbackFn | null
-	): DatumLoaderDataCallbackFn | null | this {
+		value?: LoaderDataCallbackFn<Datum[]> | null
+	): LoaderDataCallbackFn<Datum[]> | null | this {
 		if (value === undefined) {
 			return this.#callback;
 		}
@@ -396,7 +395,7 @@ class DatumLoader extends JsonClientSupport<Datum[]> implements Loader {
 	 *                 or the function must have already been configured via {@link DatumLoader.callback}
 	 * @returns this object
 	 */
-	load(callback?: DatumLoaderDataCallbackFn): this {
+	load(callback?: LoaderDataCallbackFn<Datum[]>): this {
 		// to support queue use, allow callback to be passed directly to this function
 		if (typeof callback === "function") {
 			this.#callback = callback;
@@ -474,7 +473,7 @@ class DatumLoader extends JsonClientSupport<Datum[]> implements Loader {
 			? url.replace(/^[^:]+:\/\/[^/]+/, this.#proxyUrl)
 			: url;
 
-		const req = (cb?: DatumLoaderDataCallbackFn) => {
+		const req = (cb?: LoaderDataCallbackFn<Datum[]>) => {
 			const headers: any = {
 				Accept: "application/json",
 			};

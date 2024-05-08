@@ -39,7 +39,7 @@ export type MultiLoaderDataCallbackFn = (
  * @version 2.0.0
  */
 class MultiLoader {
-	#loaders: Loader[];
+	#loaders: Loader<Datum[]>[];
 	#finishedCallback?: MultiLoaderDataCallbackFn;
 	#concurrency: number;
 
@@ -48,7 +48,7 @@ class MultiLoader {
 	 *
 	 * @param loaders - array of loader objects
 	 */
-	constructor(loaders: Loader[]) {
+	constructor(loaders: Loader<Datum[]>[]) {
 		this.#loaders = loaders;
 		this.#concurrency = Infinity;
 	}
