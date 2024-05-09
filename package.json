@@ -71,7 +71,7 @@
   "scripts": {
     "build": "tsc",
     "build:dist": "tsc --build tsconfig.dist.json",
-    "build:bundle": "rollup --config rollup.config.mjs --banner \"$(preamble)\" -m -o lib/solarnetwork-api-core.es.js",
+    "build:bundle": "rollup --config rollup.config.mjs --banner \"$(preamble)\" -m -o lib/solarnetwork-datum-loader.es.js",
     "pretest": "npm run build",
     "test": "c8 ava",
     "coverage": "c8 --reporter=lcov ava",

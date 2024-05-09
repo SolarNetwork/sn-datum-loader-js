@@ -2,7 +2,7 @@ import typescript from "@rollup/plugin-typescript";
 
 export default {
 	external: (id) => {
-		return /(d3-.*)/.test(id);
+		return /(d3-.*|solarnetwork-api-core)/.test(id);
 	},
 	input: "src/main/index.ts",
 	output: {
