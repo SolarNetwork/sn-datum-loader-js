@@ -14,7 +14,7 @@ interface ApiResult {
 }
 
 /**
- * An abstract class with customizable JSON client support.
+ * An abstract class for JSON client support.
  */
 abstract class JsonClientSupport<T> {
 	/**
@@ -43,8 +43,6 @@ abstract class JsonClientSupport<T> {
 
 	/**
 	 * Asynchronously load the data.
-	 *
-	 * This method calls {@link JsonClientSupport.load} to perform the actual work.
 	 *
 	 * @returns the result promise
 	 */
