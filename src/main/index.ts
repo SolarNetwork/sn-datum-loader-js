@@ -7,6 +7,10 @@ import {
 	DatumRange,
 	DatumRangeResult,
 } from "./datumRangeFinder.js";
+import {
+	default as DatumSourceFinder,
+	NodeSources,
+} from "./datumSourceFinder.js";
 export {
 	FetchApi,
 	type Datum,
@@ -14,7 +18,9 @@ export {
 	DatumRangeFinder,
 	type DatumRange,
 	type DatumRangeResult,
-	type LoaderDataCallbackFn,
+	DatumSourceFinder,
 	JsonClientSupport,
+	type LoaderDataCallbackFn,
 	type Loader,
+	type NodeSources,
 };
