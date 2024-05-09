@@ -15,8 +15,7 @@ import DatumLoader from "../main/datumLoader.js";
 
 const test = anyTest as TestFn<{
 	agent: MockAgent;
-	urlHelper: SolarQueryApi;
-	requets: Array<any>;
+	api: SolarQueryApi;
 }>;
 
 log.level = LogLevel.DEBUG;
@@ -33,12 +32,11 @@ test.beforeEach((t) => {
 	setGlobalDispatcher(agent);
 	t.context = {
 		agent: agent,
-		requets: [],
-		urlHelper: new SolarQueryApi({ protocol: "http", host: "localhost" }),
+		api: new SolarQueryApi({ protocol: "http", host: "localhost" }),
 	};
 });
 
-function testFilter() {
+function testFilter(): DatumFilter {
 	const filter = new DatumFilter();
 	filter.nodeId = TEST_NODE_ID;
 	filter.sourceId = TEST_SOURCE_ID;
@@ -127,7 +125,7 @@ test.serial("load:proxy:multiPage:parallel", (t) => {
 	});
 
 	const filter = testFilter();
-	const loader = new DatumLoader(t.context.urlHelper, filter)
+	const loader = new DatumLoader(t.context.api, filter)
 		.proxyUrl("https://query-proxy/path")
 		.paginationSize(2)
 		.concurrency(Infinity)
@@ -206,7 +204,7 @@ test.serial("load:proxy:multiPage:parallel:oneRequestReturnsNoData", (t) => {
 	});
 
 	const filter = testFilter();
-	const loader = new DatumLoader(t.context.urlHelper, filter)
+	const loader = new DatumLoader(t.context.api, filter)
 		.proxyUrl("https://query-proxy/path")
 		.paginationSize(2)
 		.concurrency(Infinity)
