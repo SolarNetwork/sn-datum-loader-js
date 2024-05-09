@@ -134,6 +134,7 @@ class DatumRangeFinder
 			});
 		});
 	}
+
 	/**
 	 * Asynchronously find the available datum range using a callback.
 	 *
