@@ -28,7 +28,7 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
     /**
      * Constructor.
      *
-     * @param urlHelper a URL helper for accessing node datum via SolarQuery
+     * @param api a URL helper for accessing node datum via SolarQuery
      * @param filter the filter parameters to use
      * @param authBuilder the auth builder to authenticate requests with; if not provided
      *                    then only public data can be queried; when provided a pre-signed
@@ -164,7 +164,13 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
      */
     readings(value: boolean): this;
     /**
-     * Get or set the URL to a proxy to use for loading the data.
+     * Get the URL to a proxy to use for loading the data.
+     *
+     * @returns the proxy URL
+     */
+    proxyUrl(): string | null;
+    /**
+     * Set the URL to a proxy to use for loading the data.
      *
      * This can be configured as an absolute URL to the proxy server to use instead of making requests
      * directly to the URL returned by the configured `SolarQueryApi`. For example:
@@ -172,10 +178,9 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
      * * https://query.solarnetwork.net
      * * https://query.solarnetwork.net/1m
      *
-     * @param {string} [value] the proxy URL to set, or `null` or an empty string to not use any proxy
-     * @returns {string|DatumLoader} when used a a getter, the readings mode; otherwise this object
+     * @param value the proxy URL to set, or `null` or an empty string to not use any proxy
+     * @returns this object
      */
-    proxyUrl(): string | null;
     proxyUrl(value: string | null): this;
     /**
      * Initiate loading the data.

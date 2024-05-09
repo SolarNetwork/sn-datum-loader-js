@@ -2,7 +2,7 @@ import { AuthorizationV2Builder } from "solarnetwork-api-core/lib/net/index.js";
 import { SolarQueryApi } from "solarnetwork-api-core/lib/net/index.js";
 import { LoaderDataCallbackFn } from "./loader.js";
 /**
- * An abstract class with customizable JSON client support.
+ * An abstract class for JSON client support.
  */
 declare abstract class JsonClientSupport<T> {
     /**
@@ -22,8 +22,6 @@ declare abstract class JsonClientSupport<T> {
     constructor(api: SolarQueryApi, authBuilder?: AuthorizationV2Builder);
     /**
      * Asynchronously load the data.
-     *
-     * This method calls {@link JsonClientSupport.load} to perform the actual work.
      *
      * @returns the result promise
      */
