@@ -12,7 +12,7 @@ import {
 	SolarQueryApi,
 } from "solarnetwork-api-core/lib/net/index.js";
 
-import DatumSourceFinder, { NodeSources } from "../main/datumSourceFinder.js";
+import DatumSourceFinder from "../main/datumSourceFinder.js";
 
 const test = anyTest as TestFn<{
 	agent: MockAgent;
