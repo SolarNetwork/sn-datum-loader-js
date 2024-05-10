@@ -78,8 +78,8 @@ filter.sourceIds = ["a", "b"];
 const range = await new DatumRangeFinder(api, filter).fetch();
 ```
 
-Ranges for more complex queries can be accomplished by passing in an array of URL helper
-objects, like this example, continuing from the last one:
+Ranges for more complex queries can be accomplished by passing in an array of filters,
+like this example, continuing from the last one:
 
 ```js
 const filter2 = new DatumFilter();
