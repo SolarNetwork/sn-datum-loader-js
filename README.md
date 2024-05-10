@@ -157,3 +157,5 @@ npm test
 That will output the test results and produce a HTML code coverage report at `coverage/index.html`.
 
 [datum-list]: https://github.com/SolarNetwork/solarnetwork/wiki/SolarQuery-API#datum-list
+[generate-release]: https://github.com/mrkmg/node-generate-release
+[npm]: https://www.npmjs.com/
