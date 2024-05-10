@@ -2,6 +2,23 @@
 
 This project contains classes to help with loading SolarNetwork datum over time ranges.
 
+To include the library in your NPM-based project, run the following:
+
+```sh
+npm i solarnetwork-datum-loader
+```
+
+# API docs
+
+The latest API documentation is published [here](https://solarnetwork.github.io/sn-datum-loader-js/), or
+you can build the API documentation by running the `apidoc` script:
+
+```sh
+npm run apidoc
+```
+
+That will produce HTML documentation in `docs/html`.
+
 ## DatumLoader
 
 The `DatumLoader` class helps return data from the SolarQuery [/datum/list][datum-list]
@@ -78,8 +95,8 @@ filter.sourceIds = ["a", "b"];
 const range = await new DatumRangeFinder(api, filter).fetch();
 ```
 
-Ranges for more complex queries can be accomplished by passing in an array of URL helper
-objects, like this example, continuing from the last one:
+Ranges for more complex queries can be accomplished by passing in an array of filters,
+like this example, continuing from the last one:
 
 ```js
 const filter2 = new DatumFilter();
@@ -157,3 +174,5 @@ npm test
 That will output the test results and produce a HTML code coverage report at `coverage/index.html`.
 
 [datum-list]: https://github.com/SolarNetwork/solarnetwork/wiki/SolarQuery-API#datum-list
+[generate-release]: https://github.com/mrkmg/node-generate-release
+[npm]: https://www.npmjs.com/
