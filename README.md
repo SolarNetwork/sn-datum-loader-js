@@ -65,16 +65,16 @@ filter2.sourceIds = ["b", "c"];
 const api = new SolarQueryApi();
 
 new MultiLoader(api, [
-	new DatumLoader(urlHelper, filter1),
-	new DatumLoader(urlHelper, filter2),
+	new DatumLoader(api, filter1),
+	new DatumLoader(api, filter2),
 ]).load((error, results) => {
 	// results is a 2-element array of Datum arrays
 });
 
 # or via promise...
-const result = await new MultiLoader(api, [
-	new DatumLoader(urlHelper, filter1),
-	new DatumLoader(urlHelper, filter2),
+const result = await new MultiLoader([
+	new DatumLoader(api, filter1),
+	new DatumLoader(api, filter2),
 ]).fetch();
 ```
 
