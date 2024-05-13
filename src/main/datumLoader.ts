@@ -363,8 +363,10 @@ class DatumLoader
 	 */
 	fetch(): Promise<Datum[]> {
 		if (this.#incrementalMode) {
-			throw new Error(
-				"Incremental mode is not supported via fetch(), use load(callback) instead."
+			return Promise.reject(
+				new Error(
+					"Incremental mode is not supported via fetch(), use load(callback) instead."
+				)
 			);
 		}
 		return new Promise((resolve, reject) => {
