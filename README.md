@@ -64,7 +64,7 @@ filter2.sourceIds = ["b", "c"];
 
 const api = new SolarQueryApi();
 
-new MultiLoader(api, [
+new MultiLoader([
 	new DatumLoader(api, filter1),
 	new DatumLoader(api, filter2),
 ]).load((error, results) => {
