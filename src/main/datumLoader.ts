@@ -3,13 +3,13 @@ import {
 	DatumFilter,
 	DatumReadingTypes,
 	Pagination,
-} from "solarnetwork-api-core/lib/domain/index.js";
-import { Logger as log } from "solarnetwork-api-core/lib/util/index.js";
+} from "solarnetwork-api-core/lib/domain";
+import { Logger as log } from "solarnetwork-api-core/lib/util";
 import {
 	AuthorizationV2Builder,
 	SolarQueryApi,
 	Urls,
-} from "solarnetwork-api-core/lib/net/index.js";
+} from "solarnetwork-api-core/lib/net";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
 
@@ -24,6 +24,20 @@ interface QueryResultsData {
 }
 
 const DEFAULT_PAGE_SIZE: number = 1000;
+
+/**
+ * An enumeration of loader state values.
+ */
+enum DatumLoaderState {
+	/** The loader can be configured and is ready to be used. */
+	Ready,
+
+	/** The loader is loading datum. */
+	Loading,
+
+	/** The loader has finished loading datum. */
+	Done,
+}
 
 /**
  * Load data for a set of source IDs, date range, and aggregate level using either the `listDatumUrl()`
@@ -84,11 +98,9 @@ class DatumLoader
 	 */
 	#queue?: Queue;
 
-	#state: number;
+	#state: DatumLoaderState;
 
 	#results?: Datum[];
-
-	#promise?: Promise<Datum[]>;
 
 	/**
 	 * Constructor.
@@ -116,7 +128,7 @@ class DatumLoader
 		this.#readingsMode = false;
 		this.#proxyUrl = null;
 		this.#concurrency = 0;
-		this.#state = 0;
+		this.#state = DatumLoaderState.Ready;
 	}
 
 	/**
@@ -209,6 +221,15 @@ class DatumLoader
 			this.#urlParameters = value;
 		}
 		return this;
+	}
+
+	/**
+	 * Get the loader state.
+	 *
+	 * @returns the state
+	 */
+	state(): DatumLoaderState {
+		return this.#state;
 	}
 
 	/**
@@ -399,7 +420,7 @@ class DatumLoader
 		if (!this.#callback) {
 			throw new Error("No callback provided.");
 		}
-		this.#state = 1;
+		this.#state = DatumLoaderState.Loading;
 		if (this.#concurrency > 0) {
 			this.#queue = queue(this.#concurrency);
 		}
@@ -603,3 +624,4 @@ function offsetExtractor(
 }
 
 export default DatumLoader;
+export { DatumLoaderState };

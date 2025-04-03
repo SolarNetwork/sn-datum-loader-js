@@ -1,9 +1,9 @@
 import {
 	AuthorizationV2Builder,
 	HttpHeaders,
-} from "solarnetwork-api-core/lib/net/index.js";
-import { SolarQueryApi } from "solarnetwork-api-core/lib/net/index.js";
-import { Logger as log } from "solarnetwork-api-core/lib/util/index.js";
+} from "solarnetwork-api-core/lib/net";
+import { SolarQueryApi } from "solarnetwork-api-core/lib/net";
+import { Logger as log } from "solarnetwork-api-core/lib/util";
 
 import { LoaderDataCallbackFn } from "./loader.js";
 

@@ -1,4 +1,4 @@
-import { Pagination } from "solarnetwork-api-core/lib/domain/index.js";
+import { Pagination } from "solarnetwork-api-core/lib/domain";
 
 /**
  * General SolarNetwork datum interface.
