@@ -1,10 +1,10 @@
 import { queue } from "d3-queue";
-import { DatumFilter } from "solarnetwork-api-core/lib/domain/index.js";
-import { Logger as log } from "solarnetwork-api-core/lib/util/index.js";
+import { DatumFilter } from "solarnetwork-api-core/lib/domain";
+import { Logger as log } from "solarnetwork-api-core/lib/util";
 import {
 	AuthorizationV2Builder,
 	SolarQueryApi,
-} from "solarnetwork-api-core/lib/net/index.js";
+} from "solarnetwork-api-core/lib/net";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Loader, LoaderDataCallbackFn } from "./loader.js";
 

@@ -1,5 +1,5 @@
-import { DatumFilter } from "solarnetwork-api-core/lib/domain/index.js";
-import { AuthorizationV2Builder, SolarQueryApi } from "solarnetwork-api-core/lib/net/index.js";
+import { DatumFilter } from "solarnetwork-api-core/lib/domain";
+import { AuthorizationV2Builder, SolarQueryApi } from "solarnetwork-api-core/lib/net";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Loader, LoaderDataCallbackFn } from "./loader.js";
 /** A mapping of node IDs to associated source IDs. */

@@ -1,7 +1,7 @@
 import * as FetchApi from "./fetch.js";
 import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
 import JsonClientSupport from "./jsonClientSupport.js";
-import DatumLoader from "./datumLoader.js";
+import { default as DatumLoader, DatumLoaderState } from "./datumLoader.js";
 import {
 	default as DatumRangeFinder,
 	DatumRange,
@@ -15,6 +15,7 @@ export {
 	FetchApi,
 	type Datum,
 	DatumLoader,
+	type DatumLoaderState,
 	DatumRangeFinder,
 	type DatumRange,
 	type DatumRangeResult,

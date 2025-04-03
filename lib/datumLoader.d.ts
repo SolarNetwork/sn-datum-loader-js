@@ -1,7 +1,18 @@
-import { DatumFilter } from "solarnetwork-api-core/lib/domain/index.js";
-import { AuthorizationV2Builder, SolarQueryApi } from "solarnetwork-api-core/lib/net/index.js";
+import { DatumFilter } from "solarnetwork-api-core/lib/domain";
+import { AuthorizationV2Builder, SolarQueryApi } from "solarnetwork-api-core/lib/net";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
+/**
+ * An enumeration of loader state values.
+ */
+declare enum DatumLoaderState {
+    /** The loader can be configured and is ready to be used. */
+    Ready = 0,
+    /** The loader is loading datum. */
+    Loading = 1,
+    /** The loader has finished loading datum. */
+    Done = 2
+}
 /**
  * Load data for a set of source IDs, date range, and aggregate level using either the `listDatumUrl()`
  * or `datumReadingUrl()` URLs of `SolarQueryApi` (the `/datum/list` or `/datum/reading`
@@ -19,7 +30,7 @@ import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
  * const results = await new DatumLoader(new SolarQueryApi(), filter).fetch();
  * // results is an array of Datum objects
  *
- * @version 2.0.0
+ * @version 3.0.0
  */
 declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<Datum[]> {
     #private;
@@ -89,6 +100,12 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
      * @returns this object
      */
     parameters(value: object | null): this;
+    /**
+     * Get the loader state.
+     *
+     * @returns the state
+     */
+    state(): DatumLoaderState;
     /**
      * Get the _incremental mode_ for loading the data.
      *
@@ -202,4 +219,5 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
     load(callback?: LoaderDataCallbackFn<Datum[]>): this;
 }
 export default DatumLoader;
+export { DatumLoaderState };
 //# sourceMappingURL=datumLoader.d.ts.map
