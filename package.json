@@ -17,6 +17,12 @@
   },
   "type": "module",
   "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./lib/solarnetwork-datum-loader.es.cjs"
+    }
+  },
   "engines": {
     "node": ">=18"
   },
@@ -54,7 +60,8 @@
         "npm run lint",
         "npm run build",
         "npm run build:dist",
-        "npm run build:bundle"
+        "npm run build:bundle",
+        "npm run build:bundle:cjs"
       ],
       "post_commit_commands": [
         "npm test"
@@ -72,6 +79,7 @@
     "build": "tsc",
     "build:dist": "tsc --build tsconfig.dist.json",
     "build:bundle": "rollup --config rollup.config.mjs --banner \"$(preamble)\" -m -o lib/solarnetwork-datum-loader.es.js",
+    "build:bundle:cjs": "rollup --config rollup.config.cjs.mjs --format cjs --banner \"$(preamble)\" -m -o lib/solarnetwork-datum-loader.es.cjs",
     "pretest": "npm run build",
     "test": "c8 ava",
     "coverage": "c8 --reporter=lcov ava",
@@ -88,6 +96,8 @@
   },
   "devDependencies": {
     "@ava/typescript": "^5.0.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^11.1.6",
     "@tsconfig/node18": "^18.2.4",
     "@types/crypto-js": "^4.2.2",
