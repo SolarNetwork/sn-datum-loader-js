@@ -64,7 +64,7 @@ filter2.sourceIds = ["b", "c"];
 
 const api = new SolarQueryApi();
 
-new MultiLoader(api, [
+new MultiLoader([
 	new DatumLoader(api, filter1),
 	new DatumLoader(api, filter2),
 ]).load((error, results) => {
@@ -150,6 +150,9 @@ That will produce ES2022 modules with an entry point in `lib/index.js`.
 
 You can also produce an ES2022 bundle by running `npm run build:bundle`. That will produce a single
 bundled file at `lib/solarnetwork-datum-loader.es.js`.
+
+You can also produce an CJS bundle by running `npm run build:bundle:cjs`. That will produce a single
+bundled file at `lib/solarnetwork-datum-loader.es.cjs`.
 
 # Releases
 

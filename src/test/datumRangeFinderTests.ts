@@ -1,16 +1,13 @@
 import anyTest, { TestFn } from "ava";
 import { MockAgent, setGlobalDispatcher } from "undici";
 
-import { DatumFilter } from "solarnetwork-api-core/lib/domain/index.js";
-import {
-	Logger as log,
-	LogLevel,
-} from "solarnetwork-api-core/lib/util/index.js";
+import { DatumFilter } from "solarnetwork-api-core/lib/domain";
+import { Logger as log, LogLevel } from "solarnetwork-api-core/lib/util";
 import {
 	AuthorizationV2Builder,
 	HttpHeaders,
 	SolarQueryApi,
-} from "solarnetwork-api-core/lib/net/index.js";
+} from "solarnetwork-api-core/lib/net";
 
 import DatumRangeFinder, { DatumRange } from "../main/datumRangeFinder.js";
 
