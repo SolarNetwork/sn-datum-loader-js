@@ -56,7 +56,7 @@ enum DatumLoaderState {
  * const results = await new DatumLoader(new SolarQueryApi(), filter).fetch();
  * // results is an array of Datum objects
  *
- * @version 2.0.0
+ * @version 3.0.0
  */
 class DatumLoader
 	extends JsonClientSupport<Datum[]>
