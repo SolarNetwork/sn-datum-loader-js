@@ -1,5 +1,5 @@
-import { AuthorizationV2Builder } from "solarnetwork-api-core/lib/net/index.js";
-import { SolarQueryApi } from "solarnetwork-api-core/lib/net/index.js";
+import { AuthorizationV2Builder } from "solarnetwork-api-core/lib/net";
+import { SolarQueryApi } from "solarnetwork-api-core/lib/net";
 import { LoaderDataCallbackFn } from "./loader.js";
 /**
  * An abstract class for JSON client support.
