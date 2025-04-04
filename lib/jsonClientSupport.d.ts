@@ -1,5 +1,4 @@
-import { AuthorizationV2Builder } from "solarnetwork-api-core/lib/net";
-import { SolarQueryApi } from "solarnetwork-api-core/lib/net";
+import { Net } from "solarnetwork-api-core";
 import { LoaderDataCallbackFn } from "./loader.js";
 /**
  * An abstract class for JSON client support.
@@ -8,18 +7,18 @@ declare abstract class JsonClientSupport<T> {
     /**
      * The API instance to use.
      */
-    protected readonly api: SolarQueryApi;
+    protected readonly api: Net.SolarQueryApi;
     /**
      * An authorization builder to use to make authenticated HTTP requests.
      */
-    protected readonly authBuilder?: AuthorizationV2Builder;
+    protected readonly authBuilder?: Net.AuthorizationV2Builder;
     /**
      * Constructor.
      *
      * @param authBuilder the auth builder to authenticate requests with; if not provided
      *                    then only public data can be queried
      */
-    constructor(api: SolarQueryApi, authBuilder?: AuthorizationV2Builder);
+    constructor(api: Net.SolarQueryApi, authBuilder?: Net.AuthorizationV2Builder);
     /**
      * Asynchronously load the data.
      *

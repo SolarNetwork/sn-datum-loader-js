@@ -1,10 +1,5 @@
 import { queue } from "d3-queue";
-import { DatumFilter } from "solarnetwork-api-core/lib/domain";
-import { Logger as log } from "solarnetwork-api-core/lib/util";
-import {
-	AuthorizationV2Builder,
-	SolarQueryApi,
-} from "solarnetwork-api-core/lib/net";
+import { Domain, Net, Util } from "solarnetwork-api-core";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Loader, LoaderDataCallbackFn } from "./loader.js";
 
@@ -96,7 +91,7 @@ class DatumRangeFinder
 	extends JsonClientSupport<DatumRange>
 	implements Loader<DatumRange>
 {
-	#filters: DatumFilter[];
+	#filters: Domain.DatumFilter[];
 
 	/**
 	 * Constructor.
@@ -109,9 +104,9 @@ class DatumRangeFinder
 	 *                    key must be available
 	 */
 	constructor(
-		api: SolarQueryApi,
-		filters: DatumFilter[] | DatumFilter,
-		authBuilder?: AuthorizationV2Builder
+		api: Net.SolarQueryApi,
+		filters: Domain.DatumFilter[] | Domain.DatumFilter,
+		authBuilder?: Net.AuthorizationV2Builder
 	) {
 		super(api, authBuilder);
 
@@ -152,7 +147,10 @@ class DatumRangeFinder
 		}
 		q.awaitAll((error, results) => {
 			if (error) {
-				log.error("Error requesting available data range: %s", error);
+				Util.Logger.error(
+					"Error requesting available data range: %s",
+					error
+				);
 				callback(error);
 				return;
 			}
@@ -171,7 +169,7 @@ class DatumRangeFinder
 		for (i = 0; i < results.length; i += 1) {
 			const repInterval = results[i];
 			if (repInterval?.endDate === undefined) {
-				log.debug(
+				Util.Logger.debug(
 					"No data available for %s sources %s",
 					this.#filters[i].nodeId,
 					this.#filters[i].sourceIds !== undefined

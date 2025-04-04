@@ -1,5 +1,4 @@
-import { DatumFilter } from "solarnetwork-api-core/lib/domain";
-import { AuthorizationV2Builder, SolarQueryApi } from "solarnetwork-api-core/lib/net";
+import { Domain, Net } from "solarnetwork-api-core";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Loader, LoaderDataCallbackFn } from "./loader.js";
 /** A mapping of node IDs to associated source IDs. */
@@ -46,7 +45,7 @@ declare class DatumSourceFinder extends JsonClientSupport<NodeSources> implement
      *                    then only public data can be queried; when provided a pre-signed
      *                    key must be available
      */
-    constructor(api: SolarQueryApi, filters: DatumFilter[] | DatumFilter, authBuilder?: AuthorizationV2Builder);
+    constructor(api: Net.SolarQueryApi, filters: Domain.DatumFilter[] | Domain.DatumFilter, authBuilder?: Net.AuthorizationV2Builder);
     /**
      * Initiate loading the data.
      *

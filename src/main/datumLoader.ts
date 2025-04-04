@@ -1,15 +1,5 @@
 import { Queue, queue } from "d3-queue";
-import {
-	DatumFilter,
-	DatumReadingTypes,
-	Pagination,
-} from "solarnetwork-api-core/lib/domain";
-import { Logger as log } from "solarnetwork-api-core/lib/util";
-import {
-	AuthorizationV2Builder,
-	SolarQueryApi,
-	Urls,
-} from "solarnetwork-api-core/lib/net";
+import { Domain, Net, Util } from "solarnetwork-api-core";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
 
@@ -63,7 +53,7 @@ class DatumLoader
 	implements Loader<Datum[]>
 {
 	/** The filter. */
-	readonly filter: DatumFilter;
+	readonly filter: Domain.DatumFilter;
 
 	#pageSize: number;
 	#includeTotalResultsCount: boolean;
@@ -82,7 +72,7 @@ class DatumLoader
 	#readingsMode: boolean;
 
 	/**
-	 * An optional proxy URL to use instead of the host returned by the configured `SolarQueryApi`.
+	 * An optional proxy URL to use instead of the host returned by the configured `Net.SolarQueryApi`.
 	 * This should be configured as an absolute URL to the proxy target, e.g. `https://query.solarnetwork.net/1m`.
 	 */
 	#proxyUrl: string | null;
@@ -112,9 +102,9 @@ class DatumLoader
 	 *                    key must be available
 	 */
 	constructor(
-		api: SolarQueryApi,
-		filter: DatumFilter,
-		authBuilder?: AuthorizationV2Builder
+		api: Net.SolarQueryApi,
+		filter: Domain.DatumFilter,
+		authBuilder?: Net.AuthorizationV2Builder
 	) {
 		super(api, authBuilder);
 
@@ -244,7 +234,7 @@ class DatumLoader
 	 *
 	 * When incremental mode is enabled (set to `true`) then the callback function will be invoked
 	 * for _each result page_ that is loaded. The function will be passed a second `boolean` argument
-	 * that will be set to `true` only on the last page of result data, and a third Pagination`
+	 * that will be set to `true` only on the last page of result data, and a third Domain.Pagination`
 	 * object argument that details the starting offset of the page.
 	 *
 	 * When incremental mode is disabled (set to `false`, the default) then all result pages are
@@ -359,7 +349,7 @@ class DatumLoader
 	 * Set the URL to a proxy to use for loading the data.
 	 *
 	 * This can be configured as an absolute URL to the proxy server to use instead of making requests
-	 * directly to the URL returned by the configured `SolarQueryApi`. For example:
+	 * directly to the URL returned by the configured `Net.SolarQueryApi`. For example:
 	 *
 	 * * https://query.solarnetwork.net
 	 * * https://query.solarnetwork.net/1m
@@ -425,7 +415,7 @@ class DatumLoader
 			this.#queue = queue(this.#concurrency);
 		}
 
-		this.#loadData(new Pagination(this.#pageSize, 0));
+		this.#loadData(new Domain.Pagination(this.#pageSize, 0));
 		return this;
 	}
 
@@ -436,7 +426,11 @@ class DatumLoader
 	 * @param done `true` if there is no more data to load
 	 * @param page the incremental mode page
 	 */
-	#handleResults(error: Error | undefined, done: boolean, page?: Pagination) {
+	#handleResults(
+		error: Error | undefined,
+		done: boolean,
+		page?: Domain.Pagination
+	) {
 		if (done) {
 			this.#state = 2; // done
 		}
@@ -446,7 +440,7 @@ class DatumLoader
 				Error | undefined,
 				Datum[] | undefined,
 				boolean | undefined,
-				Pagination | undefined,
+				Domain.Pagination | undefined,
 			];
 			if (this.#incrementalMode) {
 				args = [error, this.#results, done, page];
@@ -463,8 +457,8 @@ class DatumLoader
 	 * @param page the page to load
 	 * @param q the queue to use
 	 */
-	#loadData(page: Pagination, q?: Queue): void {
-		const queryFilter = new DatumFilter(this.filter);
+	#loadData(page: Domain.Pagination, q?: Queue): void {
+		const queryFilter = new Domain.DatumFilter(this.filter);
 		queryFilter.withoutTotalResultsCount =
 			(this.#includeTotalResultsCount || q) && page.offset === 0
 				? false
@@ -472,7 +466,7 @@ class DatumLoader
 
 		let url = this.#readingsMode
 			? this.api.datumReadingUrl(
-					DatumReadingTypes.Difference,
+					Domain.DatumReadingTypes.Difference,
 					queryFilter,
 					undefined,
 					undefined,
@@ -480,7 +474,7 @@ class DatumLoader
 			  )
 			: this.api.listDatumUrl(queryFilter, undefined, page);
 		if (this.#urlParameters) {
-			const queryParams = Urls.urlQueryEncode(this.#urlParameters);
+			const queryParams = Net.Urls.urlQueryEncode(this.#urlParameters);
 			if (queryParams) {
 				url += "&" + queryParams;
 			}
@@ -500,7 +494,7 @@ class DatumLoader
 			}
 			const dataArray = datumExtractor(data);
 			if (dataArray === undefined) {
-				log.debug("No data available for %s", reqUrl);
+				Util.Logger.debug("No data available for %s", reqUrl);
 				if (!q) {
 					this.#handleResults(undefined, true);
 					return;
@@ -612,7 +606,7 @@ function datumExtractor(data?: QueryResultsData): Datum[] | undefined {
  */
 function offsetExtractor(
 	data: QueryResultsData | undefined,
-	page: Pagination
+	page: Domain.Pagination
 ): number {
 	if (!data) {
 		return 0;

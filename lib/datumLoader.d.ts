@@ -1,5 +1,4 @@
-import { DatumFilter } from "solarnetwork-api-core/lib/domain";
-import { AuthorizationV2Builder, SolarQueryApi } from "solarnetwork-api-core/lib/net";
+import { Domain, Net } from "solarnetwork-api-core";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Datum, LoaderDataCallbackFn, Loader } from "./loader.js";
 /**
@@ -35,7 +34,7 @@ declare enum DatumLoaderState {
 declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<Datum[]> {
     #private;
     /** The filter. */
-    readonly filter: DatumFilter;
+    readonly filter: Domain.DatumFilter;
     /**
      * Constructor.
      *
@@ -45,7 +44,7 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
      *                    then only public data can be queried; when provided a pre-signed
      *                    key must be available
      */
-    constructor(api: SolarQueryApi, filter: DatumFilter, authBuilder?: AuthorizationV2Builder);
+    constructor(api: Net.SolarQueryApi, filter: Domain.DatumFilter, authBuilder?: Net.AuthorizationV2Builder);
     /**
      * Get the concurrency limit to use for parallel requests.
      *
@@ -117,7 +116,7 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
      *
      * When incremental mode is enabled (set to `true`) then the callback function will be invoked
      * for _each result page_ that is loaded. The function will be passed a second `boolean` argument
-     * that will be set to `true` only on the last page of result data, and a third Pagination`
+     * that will be set to `true` only on the last page of result data, and a third Domain.Pagination`
      * object argument that details the starting offset of the page.
      *
      * When incremental mode is disabled (set to `false`, the default) then all result pages are
@@ -190,7 +189,7 @@ declare class DatumLoader extends JsonClientSupport<Datum[]> implements Loader<D
      * Set the URL to a proxy to use for loading the data.
      *
      * This can be configured as an absolute URL to the proxy server to use instead of making requests
-     * directly to the URL returned by the configured `SolarQueryApi`. For example:
+     * directly to the URL returned by the configured `Net.SolarQueryApi`. For example:
      *
      * * https://query.solarnetwork.net
      * * https://query.solarnetwork.net/1m

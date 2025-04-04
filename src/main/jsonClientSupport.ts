@@ -1,9 +1,4 @@
-import {
-	AuthorizationV2Builder,
-	HttpHeaders,
-} from "solarnetwork-api-core/lib/net";
-import { SolarQueryApi } from "solarnetwork-api-core/lib/net";
-import { Logger as log } from "solarnetwork-api-core/lib/util";
+import { Net, Util } from "solarnetwork-api-core";
 
 import { LoaderDataCallbackFn } from "./loader.js";
 
@@ -20,12 +15,12 @@ abstract class JsonClientSupport<T> {
 	/**
 	 * The API instance to use.
 	 */
-	protected readonly api: SolarQueryApi;
+	protected readonly api: Net.SolarQueryApi;
 
 	/**
 	 * An authorization builder to use to make authenticated HTTP requests.
 	 */
-	protected readonly authBuilder?: AuthorizationV2Builder;
+	protected readonly authBuilder?: Net.AuthorizationV2Builder;
 
 	/**
 	 * Constructor.
@@ -33,7 +28,10 @@ abstract class JsonClientSupport<T> {
 	 * @param authBuilder the auth builder to authenticate requests with; if not provided
 	 *                    then only public data can be queried
 	 */
-	constructor(api: SolarQueryApi, authBuilder?: AuthorizationV2Builder) {
+	constructor(
+		api: Net.SolarQueryApi,
+		authBuilder?: Net.AuthorizationV2Builder
+	) {
 		this.api = api;
 		this.authBuilder = authBuilder;
 		if (!authBuilder) {
@@ -67,16 +65,21 @@ abstract class JsonClientSupport<T> {
 				Accept: "application/json",
 			};
 			if (auth && auth.signingKeyValid) {
-				headers[HttpHeaders.AUTHORIZATION] = auth
+				headers[Net.HttpHeaders.AUTHORIZATION] = auth
 					.reset()
 					.snDate(true)
 					.url(signUrl || url, true)
 					.buildWithSavedKey();
-				headers[HttpHeaders.X_SN_DATE] = auth.requestDateHeaderValue;
+				headers[Net.HttpHeaders.X_SN_DATE] =
+					auth.requestDateHeaderValue;
 			}
 
 			const errorHandler = (error: any) => {
-				log.error("Error requesting data for %s: %s", url, error);
+				Util.Logger.error(
+					"Error requesting data for %s: %s",
+					url,
+					error
+				);
 				cb(new Error(`Error requesting data for ${url}: ${error}`));
 			};
 

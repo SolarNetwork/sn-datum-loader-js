@@ -1,4 +1,4 @@
-import { Pagination } from "solarnetwork-api-core/lib/domain";
+import { Domain } from "solarnetwork-api-core";
 
 /**
  * General SolarNetwork datum interface.
@@ -23,7 +23,7 @@ export type LoaderDataCallbackFn<T> = (
 	done?: boolean,
 
 	/**  In incremental mode, the page associated with the data. */
-	page?: Pagination
+	page?: Domain.Pagination
 ) => void;
 
 /**

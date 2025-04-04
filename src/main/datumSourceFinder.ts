@@ -1,10 +1,5 @@
 import { queue } from "d3-queue";
-import { DatumFilter } from "solarnetwork-api-core/lib/domain";
-import { Logger as log } from "solarnetwork-api-core/lib/util";
-import {
-	AuthorizationV2Builder,
-	SolarQueryApi,
-} from "solarnetwork-api-core/lib/net";
+import { Domain, Net, Util } from "solarnetwork-api-core";
 import { default as JsonClientSupport } from "./jsonClientSupport.js";
 import { Loader, LoaderDataCallbackFn } from "./loader.js";
 
@@ -51,7 +46,7 @@ class DatumSourceFinder
 	extends JsonClientSupport<NodeSources>
 	implements Loader<NodeSources>
 {
-	#filters: DatumFilter[];
+	#filters: Domain.DatumFilter[];
 
 	/**
 	 * Constructor.
@@ -63,9 +58,9 @@ class DatumSourceFinder
 	 *                    key must be available
 	 */
 	constructor(
-		api: SolarQueryApi,
-		filters: DatumFilter[] | DatumFilter,
-		authBuilder?: AuthorizationV2Builder
+		api: Net.SolarQueryApi,
+		filters: Domain.DatumFilter[] | Domain.DatumFilter,
+		authBuilder?: Net.AuthorizationV2Builder
 	) {
 		super(api, authBuilder);
 
@@ -103,7 +98,10 @@ class DatumSourceFinder
 		}
 		q.awaitAll((error, results) => {
 			if (error || !results) {
-				log.error("Error requesting available sources: %s", error);
+				Util.Logger.error(
+					"Error requesting available sources: %s",
+					error
+				);
 				callback(error);
 				return;
 			}
