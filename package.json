@@ -1,6 +1,6 @@
 {
   "name": "solarnetwork-datum-loader",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "SolarNetwork Datum Loader",
   "keywords": [
     "solarnetwork"
@@ -94,7 +94,7 @@
     "d3-queue": "^3.0.7"
   },
   "peerDependencies": {
-    "solarnetwork-api-core": ">=3"
+    "solarnetwork-api-core": ">=3 <3.1"
   },
   "devDependencies": {
     "@ava/typescript": "^5.0.0",
