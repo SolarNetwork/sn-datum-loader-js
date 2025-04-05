@@ -1,5 +1,10 @@
 # SolarNetwork Datum Loader - JavaScript
 
+> :warning: This project has been absorbed into the [solarnetwork-api-core][solarnetwork-api-core]
+> package, starting in its `3.1.0` release. The classes are in the [Tool sub-package][tool-module].
+
+# Legacy information
+
 This project contains classes to help with loading SolarNetwork datum over time ranges.
 
 To include the library in your NPM-based project, run the following:
@@ -179,3 +184,5 @@ That will output the test results and produce a HTML code coverage report at `co
 [datum-list]: https://github.com/SolarNetwork/solarnetwork/wiki/SolarQuery-API#datum-list
 [generate-release]: https://github.com/mrkmg/node-generate-release
 [npm]: https://www.npmjs.com/
+[solarnetwork-api-core]: https://www.npmjs.com/package/solarnetwork-api-core
+[tool-module]: https://solarnetwork.github.io/sn-api-core-js/html/modules/Tool.html
